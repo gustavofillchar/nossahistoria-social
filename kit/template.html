@@ -113,7 +113,7 @@ const R = {
   // frase sobre foto: {"type":"foto","img":"../fotos/x.jpg","pos":"center 30%","text":"...","fs":70}
   foto: (s,i,t) => frame(i, 'foto', `<div class="mark">“</div><div class="quote" style="--fs:${s.fs||70}px">${s.text}</div>`, {total:t, img:s.img, pos:s.pos, grain:s.grain}),
   // ano: {"type":"ano","year":"2000","bg":"#F7EFE6","fg":"#2E1A1F","acc":"#8E2F42","hint":"opcional","grain":.5}
-  ano: (s,i,t) => frame(i, 'ano', `<div class="ano-pre">te amo desde</div><div class="ano-num">${s.year}</div>${s.hint?`<div class="ano-hint">${s.hint}</div>`:''}`, {total:t, center:true, grain:s.grain, vars:`--bgc:${s.bg};--fgc:${s.fg};--acc:${s.acc}`}),
+  ano: (s,i,t) => frame(i, 'ano', (s.year==='...' ? `<div class="ano-pre" style="font-size:132px;line-height:1.1">te amo<br>desde...</div>` : `<div class="ano-pre">te amo desde</div><div class="ano-num">${s.year}</div>`) + `${s.hint?`<div class="ano-hint">${s.hint}</div>`:''}`, {total:t, center:true, grain:s.grain, vars:`--bgc:${s.bg};--fgc:${s.fg};--acc:${s.acc}`}),
   // conversa: {"type":"conversa","title":"opcional","msgs":[["ele","..."],["ela","..."]],"fs":46}
   conversa: (s,i,t) => frame(i, s.theme, `${s.title?`<div class="chat-title">${s.title}</div>`:''}<div class="chat">${s.msgs.map(([w,txt])=>`<div class="msg ${w}" style="--fs:${s.fs||46}px"><span class="who">${w==='ele'?(s.ele||'ele'):(s.ela||'ela')}</span>${txt}</div>`).join('')}</div>`, {total:t, head:s.head||""}),
   // capa: {"type":"capa","kicker":"...","title":"...","sub":"...","fs":104}

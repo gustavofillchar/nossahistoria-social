@@ -5,11 +5,18 @@
   "slides": [
    {
     "type": "ano",
-    "year": "2000",
+    "year": "...",
     "bg": "#F7EFE6",
     "fg": "#2E1A1F",
     "acc": "#8E2F42",
-    "hint": "arrasta até o ano de vocês →"
+    "hint": "arrasta →"
+   },
+   {
+    "type": "ano",
+    "year": "2000",
+    "bg": "#F7EFE6",
+    "fg": "#2E1A1F",
+    "acc": "#8E2F42"
    },
    {
     "type": "ano",
