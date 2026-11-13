@@ -1,1 +1,8 @@
-{}
+{
+ "casal-romantico": {"query": "romantic couple", "orientation": "portrait", "n": 6},
+ "casal-abraco": {"query": "couple hugging", "orientation": "portrait", "n": 5},
+ "casal-maos": {"query": "couple holding hands", "orientation": "portrait", "n": 5},
+ "casal-idoso": {"query": "elderly couple love", "orientation": "portrait", "n": 6},
+ "casal-idoso-maos": {"query": "old couple holding hands", "orientation": "portrait", "n": 5},
+ "casal-por-do-sol": {"query": "couple sunset silhouette", "orientation": "portrait", "n": 4}
+}
