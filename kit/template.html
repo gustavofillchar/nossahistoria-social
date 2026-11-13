@@ -55,6 +55,23 @@ em,.hl{font-style:italic;color:var(--vinho-2)} .t-vinho em,.t-vinho .hl{color:va
 .t-vinho .swipe{color:var(--rose)}
 .center{text-align:center;align-items:center}
 .envelope{font-size:110px;margin-bottom:30px}
+
+/* textura granulada em todos os slides */
+.grain{position:absolute;inset:0;pointer-events:none;z-index:5;mix-blend-mode:multiply;opacity:var(--g,.5)}
+.t-vinho .grain,.t-foto .grain{mix-blend-mode:overlay;opacity:var(--g,.55)}
+.vig{position:absolute;inset:0;pointer-events:none;z-index:4;background:radial-gradient(95% 75% at 50% 45%,transparent 55%,rgba(60,15,25,.22) 100%)}
+section.slide>.head,section.slide>.body,section.slide>.foot{position:relative;z-index:6}
+/* slide com foto de fundo */
+.t-foto{background:#1b0d12;color:#FBF3EA}
+.t-foto .bg{position:absolute;inset:0;background-size:cover;background-position:var(--pos,center);filter:saturate(.92) contrast(1.04) sepia(.12);z-index:1}
+.t-foto .shade{position:absolute;inset:0;z-index:2;background:linear-gradient(180deg,rgba(20,8,12,.35) 0%,rgba(20,8,12,.05) 30%,rgba(20,8,12,.15) 50%,rgba(20,8,12,.72) 75%,rgba(20,8,12,.88) 100%)}
+.t-foto .body{justify-content:flex-end;padding-bottom:30px}
+.t-foto .quote{color:#FBF3EA;text-shadow:0 2px 22px rgba(0,0,0,.35)}
+.t-foto .quote b,.t-foto em{color:#F2C4B4}
+.t-foto .mark{color:#F2C4B4;opacity:.8}
+.t-foto .foot{color:rgba(251,243,234,.9)} .t-foto .heart path{fill:#F2C4B4}
+.quote,.big,.sub{text-wrap:balance}
+.t-foto .head{color:rgba(251,243,234,.9);text-shadow:0 1px 8px rgba(0,0,0,.5)}
 </style>
 </head>
 <body>
@@ -64,10 +81,12 @@ const HANDLE = "@nossahistoria.a2";
 const HEART = '<svg class="heart" viewBox="0 0 32 30"><path d="M16 29C7 22 1 16.5 1 9.6 1 4.8 4.7 1 9.3 1c2.8 0 5.2 1.5 6.7 3.8C17.5 2.5 19.9 1 22.7 1 27.3 1 31 4.8 31 9.6 31 16.5 25 22 16 29z"/></svg>';
 const esc = s => s; // conteúdo é nosso (JSON do post); permite <em>, <b>, <br>
 
+const GRAIN = '<svg class="grain" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><filter id="gn"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" seed="4"/><feColorMatrix values="0 0 0 0 .5 0 0 0 0 .4 0 0 0 0 .38 0 0 0 .6 0"/></filter><filter id="gm"><feTurbulence type="fractalNoise" baseFrequency=".005" numOctaves="2" seed="9"/><feColorMatrix values="0 0 0 0 .55 0 0 0 0 .4 0 0 0 0 .32 0 0 0 .3 0"/></filter><rect width="100%" height="100%" filter="url(#gm)"/><rect width="100%" height="100%" filter="url(#gn)"/></svg>';
 function frame(i, theme, inner, opts={}){
   const head = opts.head ?? "";
   const pager = opts.total > 1 ? `${i}/${opts.total}` : "";
-  return `<section class="slide t-${theme||'creme'}" id="s${i}">
+  const bg = opts.img ? `<div class="bg" style="background-image:url('${opts.img}');--pos:${opts.pos||'center'}"></div><div class="shade"></div>` : '';
+  return `<section class="slide t-${theme||'creme'}" id="s${i}" style="${opts.grain!=null?`--g:${opts.grain}`:''}">${bg}${GRAIN}<div class="vig"></div>
     <div class="head"><span>${head}</span><span>${pager}</span></div>
     <div class="body ${opts.center?'center':''}">${inner}</div>
     <div class="foot">${HEART}<span>${HANDLE}</span></div>
@@ -78,6 +97,8 @@ function frame(i, theme, inner, opts={}){
 const R = {
   // frase romântica: {"type":"frase","text":"...","sign":"opcional","fs":76}
   frase: (s,i,t) => frame(i, s.theme, `<div class="mark">“</div><div class="quote" style="--fs:${s.fs||76}px">${esc(s.text)}</div>${s.sign?`<div class="sign">— ${s.sign}</div>`:''}`, {total:t, head:s.head||""}),
+  // frase sobre foto: {"type":"foto","img":"../fotos/x.jpg","pos":"center 30%","text":"...","fs":70}
+  foto: (s,i,t) => frame(i, 'foto', `<div class="mark">“</div><div class="quote" style="--fs:${s.fs||70}px">${s.text}</div>`, {total:t, img:s.img, pos:s.pos, grain:s.grain}),
   // conversa: {"type":"conversa","title":"opcional","msgs":[["ele","..."],["ela","..."]],"fs":46}
   conversa: (s,i,t) => frame(i, s.theme, `${s.title?`<div class="chat-title">${s.title}</div>`:''}<div class="chat">${s.msgs.map(([w,txt])=>`<div class="msg ${w}" style="--fs:${s.fs||46}px"><span class="who">${w==='ele'?(s.ele||'ele'):(s.ela||'ela')}</span>${txt}</div>`).join('')}</div>`, {total:t, head:s.head||""}),
   // capa: {"type":"capa","kicker":"...","title":"...","sub":"...","fs":104}
