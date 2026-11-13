@@ -1,7 +1,10 @@
 """Reel em motion do @nossahistoria.a2: alterna cenas de fundo texturizado e cenas de vídeo,
 com a declaração aparecendo palavra por palavra.
 
-Uso: python3 -I kit/reels/render_motion.py <motion.json> <saida.mp4> [--audio musica.mp3] [--voice voz.mp3]
+Uso: python3 -I kit/reels/render_motion.py <motion.json> <saida.mp4> [--audio musica.mp3]
+Narração: cada cena pode ter "voice": "voz/<slug>/01.mp3" e "voice_at": segundos após o início da cena.
+O texto da cena começa a aparecer junto com a fala (ou use "delay" para controlar).
+Música: --audio, ou "music": {"src": "...", "start": 0, "volume": 0.2} no JSON (fica baixinha sob a voz).
 motion.json:
 {"scenes": [
   {"type": "textura", "text": "Eu queria te dizer <b>uma coisa</b>...", "dur": 3, "theme": "creme|dark", "kicker": "opcional"},
@@ -17,7 +20,8 @@ FPS = 30
 cfg = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
 out = sys.argv[2]
 arg = lambda k: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else None
-music, voice = arg("--audio"), arg("--voice")
+mcfg = cfg.get("music") or {}
+music = arg("--audio") or mcfg.get("src")
 here = pathlib.Path(__file__).resolve().parent
 tmp = pathlib.Path(tempfile.mkdtemp())
 X = float(cfg.get("xfade", 0.4))
@@ -32,6 +36,8 @@ with sync_playwright() as p:
     pg.goto((here / "motion.html").as_uri())
     for k, sc in enumerate(scenes):
         d = tmp / f"s{k}"; d.mkdir()
+        if sc.get("voice") and "delay" not in sc:
+            sc["delay"] = max(0.1, sc.get("voice_at", 0.4) - 0.1)
         pg.evaluate("sc => window.build(sc)", sc)
         pg.evaluate("document.fonts.ready"); pg.wait_for_timeout(120)
         end = pg.evaluate("Math.max(0,...document.getAnimations().map(a => { const t=a.effect.getTiming(); return t.delay + t.duration; }))")
@@ -72,17 +78,24 @@ for k in range(1, len(segs)):
 total = sum(d for _, d in segs) - X * (len(segs) - 1)
 fc += f"[{last}]noise=alls=7:allf=t,vignette=PI/5,fade=t=in:st=0:d=0.4,fade=t=out:st={total - 0.6:.3f}:d=0.6,format=yuv420p[vout]"
 cmd = ["ffmpeg", "-v", "error", "-y", *inputs]
-amap = []
-n_in = len(segs)
-if music or voice:
-    parts = []
-    if music:
-        cmd += ["-i", music]; parts.append((n_in, 0.35 if voice else 1.0)); n_in += 1
-    if voice:
-        cmd += ["-i", voice]; parts.append((n_in, 1.0)); n_in += 1
-    for i, (idx, vol) in enumerate(parts):
-        fc += f";[{idx}:a]volume={vol},apad[a{i}]"
-    fc += ";" + "".join(f"[a{i}]" for i in range(len(parts))) + f"amix=inputs={len(parts)}:normalize=0,atrim=0:{total:.3f},afade=t=out:st={total - 1:.3f}:d=1[aout]"
+amap, n_in, labels = [], len(segs), []
+# início absoluto de cada cena (descontando as fusões)
+starts, t = [], 0.0
+for k, (_, d) in enumerate(segs):
+    starts.append(t); t += d - X
+for k, sc in enumerate(scenes):
+    if sc.get("voice"):
+        at = int((starts[k] + sc.get("voice_at", 0.4)) * 1000)
+        cmd += ["-i", sc["voice"]]
+        fc += f";[{n_in}:a]aresample=44100,aformat=channel_layouts=stereo,volume={sc.get('voice_volume', 1.0)},adelay={at}|{at}[v{k}]"
+        labels.append(f"[v{k}]"); n_in += 1
+if music:
+    cmd += ["-ss", str(mcfg.get("start", 0)), "-i", music]
+    vol = mcfg.get("volume", 0.2 if labels else 0.8)
+    fc += f";[{n_in}:a]aresample=44100,aformat=channel_layouts=stereo,volume={vol},afade=t=in:d=1.2[m]"
+    labels.append("[m]"); n_in += 1
+if labels:
+    fc += ";" + "".join(labels) + f"amix=inputs={len(labels)}:normalize=0:duration=longest,atrim=0:{total:.3f},afade=t=out:st={total - 1.5:.3f}:d=1.5[aout]"
     amap = ["-map", "[aout]", "-c:a", "aac", "-b:a", "192k"]
 cmd += ["-filter_complex", fc, "-map", "[vout]", *amap, "-t", f"{total:.3f}", "-r", str(FPS),
         "-c:v", "libx264", "-preset", "veryfast", "-crf", "21", "-pix_fmt", "yuv420p", "-movflags", "+faststart", out]

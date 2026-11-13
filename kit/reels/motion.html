@@ -22,7 +22,7 @@ html,body{margin:0;background:transparent}
 .on-video .txt{bottom:520px;color:#FBF3EA;text-shadow:0 2px 24px rgba(0,0,0,.4)}
 .txt b{font-weight:600;color:#8E2F42} .on-video .txt b,.dark .txt b{color:#F2C4B4}
 .w{display:inline-block;opacity:0;filter:blur(10px);transform:translateY(22px);
-  animation:in .9s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i)*var(--step,.16s) + .25s)}
+  animation:in .9s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i)*var(--step,.16s) + var(--d,.25s))}
 @keyframes in{to{opacity:1;filter:blur(0);transform:none}}
 .orn{position:absolute;left:0;right:0;text-align:center;font-family:"Poppins";font-weight:400;font-size:24px;letter-spacing:.32em;
   text-transform:uppercase;opacity:0;animation:fade 1.2s ease forwards .1s}
@@ -53,7 +53,7 @@ window.build = (sc) => {
   const S = document.getElementById('S');
   const dark = sc.theme === 'dark';
   const fs = sc.fs ? `--fs:${sc.fs}px;` : '';
-  const step = sc.step ? `--step:${sc.step}s;` : '';
+  const step = (sc.step ? `--step:${sc.step}s;` : '') + (sc.delay != null ? `--d:${sc.delay}s;` : '');
   const body = `<div class="txt" style="${fs}${step}">${sc.heart?HEART(dark?'#F2C4B4':'#8E2F42'):''}${words(sc.text||'')}</div>`
     + (sc.kicker ? `<div class="orn">${sc.kicker}</div>` : '')
     + (sc.handle ? `<div class="handle">@nossahistoria.a2</div>` : '');
