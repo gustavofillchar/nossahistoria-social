@@ -1,0 +1,67 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:"Lora";src:url(../fonts/Lora-Variable.ttf);font-weight:400 700}
+@font-face{font-family:"Lora";src:url(../fonts/Lora-Italic-Variable.ttf);font-weight:400 700;font-style:italic}
+@font-face{font-family:"Poppins";src:url(../fonts/Poppins-Light.ttf);font-weight:300}
+@font-face{font-family:"Poppins";src:url(../fonts/Poppins-Regular.ttf);font-weight:400}
+html,body{margin:0;background:transparent}
+#S{width:1080px;height:1920px;position:relative;overflow:hidden}
+/* cena de textura: papel creme com fibras e manchas suaves */
+.paper{position:absolute;inset:0;background:
+  radial-gradient(120% 80% at 30% 20%,#FBF4EA 0%,#F3E6D8 55%,#E9D6C4 100%)}
+.paper svg{position:absolute;inset:0;width:100%;height:100%;mix-blend-mode:multiply;opacity:.55}
+.paper .vig{position:absolute;inset:0;background:radial-gradient(90% 70% at 50% 45%,transparent 55%,rgba(107,30,46,.18) 100%)}
+.paper.dark{background:radial-gradient(120% 80% at 30% 20%,#7A2638 0%,#5E1A29 60%,#45111D 100%)}
+.paper.dark svg{mix-blend-mode:overlay;opacity:.5}
+/* máscara das cenas de vídeo */
+.mask{position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,8,12,.25) 0%,rgba(18,8,12,0) 25%,rgba(18,8,12,0) 45%,rgba(18,8,12,.6) 66%,rgba(18,8,12,.85) 100%)}
+
+.txt{position:absolute;left:110px;right:110px;text-align:center;font-family:"Lora",serif;font-style:italic;font-weight:500;
+  font-size:var(--fs,88px);line-height:1.22;letter-spacing:-.01em;text-wrap:balance}
+.on-paper .txt{top:50%;transform:translateY(-50%);color:#3A1B22}
+.on-paper.dark .txt{color:#FBF3EA}
+.on-video .txt{bottom:520px;color:#FBF3EA;text-shadow:0 2px 24px rgba(0,0,0,.4)}
+.txt b{font-weight:600;color:#8E2F42} .on-video .txt b,.dark .txt b{color:#F2C4B4}
+.w{display:inline-block;opacity:0;filter:blur(10px);transform:translateY(22px);
+  animation:in .9s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i)*var(--step,.16s) + .25s)}
+@keyframes in{to{opacity:1;filter:blur(0);transform:none}}
+.orn{position:absolute;left:0;right:0;text-align:center;font-family:"Poppins";font-weight:400;font-size:24px;letter-spacing:.32em;
+  text-transform:uppercase;opacity:0;animation:fade 1.2s ease forwards .1s}
+.on-paper .orn{top:calc(50% - 300px);color:#8E2F42} .dark .orn{color:#F2C4B4}
+.handle{position:absolute;left:0;right:0;bottom:430px;text-align:center;font-family:"Poppins";font-weight:300;font-size:30px;letter-spacing:.08em;
+  opacity:0;animation:fade 1.2s ease forwards 1s}
+.on-paper .handle{color:#8A7377} .on-video .handle,.dark .handle{color:rgba(251,243,234,.85)}
+.heart{display:block;margin:0 auto 26px;width:44px;height:41px;opacity:0;animation:fade 1s ease forwards}
+@keyframes fade{to{opacity:1}}
+</style></head><body><div id="S"></div>
+<script>
+const NOISE = `<svg xmlns="http://www.w3.org/2000/svg"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="3" seed="7"/><feColorMatrix values="0 0 0 0 .45 0 0 0 0 .32 0 0 0 0 .28 0 0 0 .55 0"/></filter>
+<filter id="m"><feTurbulence type="fractalNoise" baseFrequency=".006" numOctaves="2" seed="3"/><feColorMatrix values="0 0 0 0 .55 0 0 0 0 .38 0 0 0 0 .3 0 0 0 .35 0"/></filter>
+<rect width="100%" height="100%" filter="url(#m)"/><rect width="100%" height="100%" filter="url(#n)"/></svg>`;
+const HEART = (c) => `<svg class="heart" viewBox="0 0 32 30"><path fill="${c}" d="M16 29C7 22 1 16.5 1 9.6 1 4.8 4.7 1 9.3 1c2.8 0 5.2 1.5 6.7 3.8C17.5 2.5 19.9 1 22.7 1 27.3 1 31 4.8 31 9.6 31 16.5 25 22 16 29z"/></svg>`;
+function words(html){
+  // separa por espaço preservando <b>...</b> (cada palavra herda o negrito)
+  let i=0, out=[], bold=false;
+  for (let tok of html.split(/\s+/)) {
+    if (tok.startsWith('<b>')) { bold=true; tok=tok.slice(3); }
+    let close = tok.endsWith('</b>'); if (close) tok=tok.slice(0,-4);
+    out.push(`<span class="w" style="--i:${i++}">${bold?`<b>${tok}</b>`:tok}</span>`);
+    if (close) bold=false;
+  }
+  return out.join(' ');
+}
+window.build = (sc) => {
+  const S = document.getElementById('S');
+  const dark = sc.theme === 'dark';
+  const fs = sc.fs ? `--fs:${sc.fs}px;` : '';
+  const step = sc.step ? `--step:${sc.step}s;` : '';
+  const body = `<div class="txt" style="${fs}${step}">${sc.heart?HEART(dark?'#F2C4B4':'#8E2F42'):''}${words(sc.text||'')}</div>`
+    + (sc.kicker ? `<div class="orn">${sc.kicker}</div>` : '')
+    + (sc.handle ? `<div class="handle">@nossahistoria.a2</div>` : '');
+  S.className = sc.type === 'video' ? 'on-video' : ('on-paper' + (dark?' dark':''));
+  S.innerHTML = sc.type === 'video'
+    ? `<div class="mask"></div>${body}`
+    : `<div class="paper ${dark?'dark':''}">${NOISE}<div class="vig"></div></div>${body}`;
+  document.getAnimations().forEach(a => a.pause());
+};
+window.seek = (ms) => document.getAnimations().forEach(a => { a.currentTime = ms; });
+</script></body></html>
