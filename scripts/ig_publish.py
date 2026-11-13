@@ -9,7 +9,7 @@ Uso:
 
 posts/gatilho.json: {"slug": "AAAA-MM-DD-tema", "dry_run": false}
 Variáveis de ambiente (GitHub Secrets): IG_TOKEN, IG_USER_ID.
-1 arte = post de imagem única; 2 a 10 artes = carrossel.
+1 arte = post de imagem única; 2 a 10 artes = carrossel; posts/<slug>/<slug>.mp4 = Reel.
 Já publicados ficam em posts/publicados.json, para nunca publicar duas vezes.
 """
 import argparse, glob, json, os, sys, time, urllib.error, urllib.parse, urllib.request
@@ -37,7 +37,15 @@ def slides(slug):
     return sorted(glob.glob(os.path.join(ROOT, "posts", slug, f"{slug}-[0-9][0-9].png")))
 
 
+def reel(slug):
+    f = os.path.join(ROOT, "posts", slug, f"{slug}.mp4")
+    return f if os.path.exists(f) else None
+
+
 def prepare(post):
+    if reel(post["slug"]):
+        print(f"Reel pronto: posts/{post['slug']}/{post['slug']}.mp4")
+        return
     from PIL import Image
     out = []
     for png in slides(post["slug"]):
@@ -66,7 +74,7 @@ def api(method, path, **params):
 
 
 def wait_ready(cid):
-    for _ in range(30):
+    for _ in range(60):
         st = api("GET", cid, fields="status_code").get("status_code")
         if st == "FINISHED":
             return
@@ -82,10 +90,18 @@ def publish(post, dry_run):
         print(f"{post['slug']} já foi publicado ({log[post['slug']]['permalink']}). Nada a fazer.")
         return
     uid = os.environ["IG_USER_ID"]
+    caption = post.get("caption", "")
+    video = reel(post["slug"])
+    if video:
+        params = {"media_type": "REELS", "video_url": RAW + os.path.relpath(video, ROOT),
+                  "caption": caption, "share_to_feed": "true"}
+        if post.get("thumb_offset") is not None:
+            params["thumb_offset"] = str(post["thumb_offset"])
+        container = api("POST", f"{uid}/media", **params)["id"]
+        return finish(post, log, uid, container, dry_run, "reel")
     urls = [RAW + os.path.relpath(p[:-4] + ".jpg", ROOT) for p in slides(post["slug"])]
     if not 1 <= len(urls) <= 10:
         sys.exit(f"O post precisa de 1 a 10 imagens; {post['slug']} tem {len(urls)}")
-    caption = post.get("caption", "")
     if len(urls) == 1:
         params = {"image_url": urls[0], "caption": caption}
         if post.get("alt"):
@@ -102,9 +118,13 @@ def publish(post, dry_run):
             wait_ready(c)
         container = api("POST", f"{uid}/media", media_type="CAROUSEL",
                         children=",".join(children), caption=caption)["id"]
+    return finish(post, log, uid, container, dry_run, f"{len(urls)} imagem(ns)")
+
+
+def finish(post, log, uid, container, dry_run, what):
     wait_ready(container)
     if dry_run:
-        print(f"Teste ok: {len(urls)} imagem(ns) aceitas pelo Instagram, mas NÃO publicado (dry run).")
+        print(f"Teste ok: {what} aceito(s) pelo Instagram, mas NÃO publicado (dry run).")
         return
     media_id = api("POST", f"{uid}/media_publish", creation_id=container)["id"]
     link = api("GET", media_id, fields="permalink").get("permalink", "")
