@@ -57,8 +57,9 @@ window.build = (sc) => {
   const body = `<div class="txt" style="${fs}${step}">${sc.heart?HEART(dark?'#F2C4B4':'#8E2F42'):''}${words(sc.text||'')}</div>`
     + (sc.kicker ? `<div class="orn">${sc.kicker}</div>` : '')
     + (sc.handle ? `<div class="handle">@nossahistoria.a2</div>` : '');
-  S.className = sc.type === 'video' ? 'on-video' : ('on-paper' + (dark?' dark':''));
-  S.innerHTML = sc.type === 'video'
+  const onImg = sc.type === 'video' || sc.type === 'foto';
+  S.className = onImg ? 'on-video' : ('on-paper' + (dark?' dark':''));
+  S.innerHTML = onImg
     ? `<div class="mask"></div>${body}`
     : `<div class="paper ${dark?'dark':''}">${NOISE}<div class="vig"></div></div>${body}`;
   document.getAnimations().forEach(a => a.pause());

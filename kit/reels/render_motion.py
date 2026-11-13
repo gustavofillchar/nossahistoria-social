@@ -9,8 +9,9 @@ motion.json:
 {"scenes": [
   {"type": "textura", "text": "Eu queria te dizer <b>uma coisa</b>...", "dur": 3, "theme": "creme|dark", "kicker": "opcional"},
   {"type": "video", "src": "caminho.mp4", "start": 0, "dur": 3.5, "text": "No meio de tanta gente,"},
+  {"type": "foto", "src": "fotos/praia-1.jpg", "dur": 3.5, "text": "..."},   (zoom lento sobre a foto)
   {"type": "textura", "text": "...", "dur": 3.5, "heart": true, "handle": true}
- ], "xfade": 0.4}
+ ], "xfade": 0.4, "grain": 7}   (grain: intensidade do granulado no vídeo todo; 12-16 = bem granulado)
 Saída: 1080x1920, 30 fps, H.264. Sem áudio, a menos que --audio/--voice.
 """
 import json, pathlib, subprocess, sys, tempfile
@@ -44,7 +45,7 @@ with sync_playwright() as p:
         n = min(int(sc["dur"] * FPS), int(end / 1000 * FPS) + 2)
         for f in range(n):
             pg.evaluate("ms => window.seek(ms)", f * 1000 / FPS)
-            pg.locator("#S").screenshot(path=str(d / f"{f:04d}.png"), omit_background=sc["type"] == "video")
+            pg.locator("#S").screenshot(path=str(d / f"{f:04d}.png"), omit_background=sc["type"] in ("video", "foto"))
         sc["_frames"] = n
     b.close()
 
@@ -55,12 +56,14 @@ for k, sc in enumerate(scenes):
     hold = max(0.0, dur - sc["_frames"] / FPS)
     txt = ["-framerate", str(FPS), "-i", str(tmp / f"s{k}" / "%04d.png")]
     pad = f"tpad=stop_mode=clone:stop_duration={hold + 0.1}"
-    if sc["type"] == "video":
+    if sc["type"] in ("video", "foto"):
+        src_in = (["-loop", "1", "-framerate", str(FPS), "-t", str(dur), "-i", sc["src"]] if sc["type"] == "foto"
+                  else ["-ss", str(sc.get("start", 0)), "-t", str(dur), "-i", sc["src"]])
         fc = (f"[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
-              f"scale=w='1080*(1+0.04*t/{dur})':h=-2:eval=frame,crop=1080:1920,"
+              f"scale=w='1080*(1+{0.08 if sc['type'] == 'foto' else 0.04}*t/{dur})':h=-2:eval=frame,crop=1080:1920,"
               "eq=contrast=1.05:saturation=1.08:gamma=1.04,colorbalance=rs=.04:bs=-.03:rm=.03:bm=-.02,"
               f"fps={FPS},setsar=1[v];[1:v]format=rgba,{pad}[t];[v][t]overlay=0:0:shortest=0,format=yuv420p[o]")
-        run(["ffmpeg", "-v", "error", "-y", "-ss", str(sc.get("start", 0)), "-t", str(dur), "-i", sc["src"], *txt,
+        run(["ffmpeg", "-v", "error", "-y", *src_in, *txt,
              "-filter_complex", fc, "-map", "[o]", "-t", str(dur), "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "16", str(seg)])
     else:
         run(["ffmpeg", "-v", "error", "-y", *txt, "-vf", f"{pad},fps={FPS},format=yuv420p,setsar=1",
@@ -76,7 +79,7 @@ for k in range(1, len(segs)):
     fc += f"[{last}][{k}:v]xfade=transition=fade:duration={X}:offset={off:.3f}[x{k}];"
     last = f"x{k}"
 total = sum(d for _, d in segs) - X * (len(segs) - 1)
-fc += f"[{last}]noise=alls=7:allf=t,vignette=PI/5,fade=t=in:st=0:d=0.4,fade=t=out:st={total - 0.6:.3f}:d=0.6,format=yuv420p[vout]"
+fc += f"[{last}]noise=alls={cfg.get('grain', 7)}:allf=t,vignette=PI/5,fade=t=in:st=0:d=0.4,fade=t=out:st={total - 0.6:.3f}:d=0.6,format=yuv420p[vout]"
 cmd = ["ffmpeg", "-v", "error", "-y", *inputs]
 amap, n_in, labels = [], len(segs), []
 # início absoluto de cada cena (descontando as fusões)
