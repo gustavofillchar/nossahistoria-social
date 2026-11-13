@@ -14,13 +14,16 @@ Página romântica de casal no Instagram. Posts só quando o dono pedir (sem age
   Não usar enquanto o dono não pedir.
 
 ## Textos
+Banco em `frases/banco.md` (ler antes de escrever; marcar `[usada AAAA-MM-DD]` ao postar; acrescentar frases boas que encontrar).
 Frases românticas conhecidas no Brasil (pesquisar em portais brasileiros) ou originais no mesmo estilo. Nunca tradução literal do inglês,
 nunca letra de música nem trecho de poeta com direitos (Vinicius, Quintana, Neruda etc.). Nada sexual explícito.
 
 ## Mídia
 - Pasta local do dono: `~/Movies/nossahistoria-midia/` (`videos/`, `musicas/`, `prontos/`). Ler pelo computador vinculado.
 - **Vídeo usado = renomear com prefixo `usado-`** (ex.: `usado-6319577-...mp4`). Preferir vídeos sem o prefixo.
-- Fotos do Unsplash: adicione `{"nome": {"query": "...", "orientation": "portrait", "n": 4}}` em `fotos/pedidos.json` e dê push;
+- Fotos do Unsplash (chave de desenvolvedor, limite de 50 requisições/hora contando buscas e downloads): **usar primeiro as fotos
+  que já estão em `fotos/`**; só pedir novas quando faltar o tema, no máximo 2-3 buscas por vez e `n` até 5. Nada de varrer o acervo.
+  Foto usada: anotar em `fotos/usadas.json` (`{"casal-idoso-6": "AAAA-MM-DD"}`). Para pedir: adicione `{"nome": {"query": "...", "orientation": "portrait", "n": 4}}` em `fotos/pedidos.json` e dê push;
   a Action "Fotos do Unsplash" baixa em `fotos/<nome>-N.jpg` (créditos em `fotos/creditos.json`).
 - Reel finalizado: copiar para `prontos/` na pasta do dono e mandar o vídeo na conversa.
 
