@@ -78,6 +78,13 @@ body.story section.slide{height:1920px;padding:250px 104px 300px}
 body.story .head{display:none}
 body.story .t-foto .shade{background:linear-gradient(180deg,rgba(20,8,12,.45) 0%,rgba(20,8,12,.05) 25%,rgba(20,8,12,.1) 48%,rgba(20,8,12,.75) 72%,rgba(20,8,12,.9) 100%)}
 body.story .quote{font-size:calc(var(--fs,76px)*1.08)}
+
+/* slide de ano ("te amo desde 2000") */
+.t-ano{background:var(--bgc);color:var(--fgc)}
+.t-ano .head{color:var(--acc)} .t-ano .foot{color:var(--acc)} .t-ano .heart path{fill:var(--acc)}
+.ano-pre{font-family:"Lora",serif;font-style:italic;font-weight:500;font-size:84px;line-height:1;text-align:center}
+.ano-num{font-family:"Lora",serif;font-weight:600;font-size:300px;line-height:1;letter-spacing:-.04em;text-align:center;margin-top:18px;color:var(--acc)}
+.ano-hint{position:absolute;left:0;right:0;bottom:150px;text-align:center;font-size:28px;letter-spacing:.12em;color:var(--acc);font-weight:500;z-index:6}
 </style>
 </head>
 <body>
@@ -92,7 +99,7 @@ function frame(i, theme, inner, opts={}){
   const head = opts.head ?? "";
   const pager = opts.total > 1 ? `${i}/${opts.total}` : "";
   const bg = opts.img ? `<div class="bg" style="background-image:url('${opts.img}');--pos:${opts.pos||'center'}"></div><div class="shade"></div>` : '';
-  return `<section class="slide t-${theme||'creme'}" id="s${i}" style="${opts.grain!=null?`--g:${opts.grain}`:''}">${bg}${GRAIN}<div class="vig"></div>
+  return `<section class="slide t-${theme||'creme'}" id="s${i}" style="${opts.grain!=null?`--g:${opts.grain};`:''}${opts.vars||''}">${bg}${GRAIN}<div class="vig"></div>
     <div class="head"><span>${head}</span><span>${pager}</span></div>
     <div class="body ${opts.center?'center':''}">${inner}</div>
     <div class="foot">${HEART}<span>${HANDLE}</span></div>
@@ -105,6 +112,8 @@ const R = {
   frase: (s,i,t) => frame(i, s.theme, `<div class="mark">“</div><div class="quote" style="--fs:${s.fs||76}px">${esc(s.text)}</div>${s.sign?`<div class="sign">— ${s.sign}</div>`:''}`, {total:t, head:s.head||""}),
   // frase sobre foto: {"type":"foto","img":"../fotos/x.jpg","pos":"center 30%","text":"...","fs":70}
   foto: (s,i,t) => frame(i, 'foto', `<div class="mark">“</div><div class="quote" style="--fs:${s.fs||70}px">${s.text}</div>`, {total:t, img:s.img, pos:s.pos, grain:s.grain}),
+  // ano: {"type":"ano","year":"2000","bg":"#F7EFE6","fg":"#2E1A1F","acc":"#8E2F42","hint":"opcional","grain":.5}
+  ano: (s,i,t) => frame(i, 'ano', `<div class="ano-pre">te amo desde</div><div class="ano-num">${s.year}</div>${s.hint?`<div class="ano-hint">${s.hint}</div>`:''}`, {total:t, center:true, grain:s.grain, vars:`--bgc:${s.bg};--fgc:${s.fg};--acc:${s.acc}`}),
   // conversa: {"type":"conversa","title":"opcional","msgs":[["ele","..."],["ela","..."]],"fs":46}
   conversa: (s,i,t) => frame(i, s.theme, `${s.title?`<div class="chat-title">${s.title}</div>`:''}<div class="chat">${s.msgs.map(([w,txt])=>`<div class="msg ${w}" style="--fs:${s.fs||46}px"><span class="who">${w==='ele'?(s.ele||'ele'):(s.ela||'ela')}</span>${txt}</div>`).join('')}</div>`, {total:t, head:s.head||""}),
   // capa: {"type":"capa","kicker":"...","title":"...","sub":"...","fs":104}

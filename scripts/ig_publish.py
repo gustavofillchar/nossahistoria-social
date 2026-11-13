@@ -103,8 +103,8 @@ def publish(post, dry_run):
     urls = [RAW + os.path.relpath(p[:-4] + ".jpg", ROOT) for p in slides(post["slug"])]
     if post.get("format") == "story":
         return publish_stories(post, log, uid, urls, dry_run)
-    if not 1 <= len(urls) <= 10:
-        sys.exit(f"O post precisa de 1 a 10 imagens; {post['slug']} tem {len(urls)}")
+    if not 1 <= len(urls) <= 20:
+        sys.exit(f"O post precisa de 1 a 20 imagens; {post['slug']} tem {len(urls)}")
     if len(urls) == 1:
         params = {"image_url": urls[0], "caption": caption}
         if post.get("alt"):
