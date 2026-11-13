@@ -1,0 +1,36 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:"Lora";src:url(../fonts/Lora-Variable.ttf);font-weight:400 700}
+@font-face{font-family:"Lora";src:url(../fonts/Lora-Italic-Variable.ttf);font-weight:400 700;font-style:italic}
+@font-face{font-family:"Poppins";src:url(../fonts/Poppins-Light.ttf);font-weight:300}
+@font-face{font-family:"Poppins";src:url(../fonts/Poppins-Regular.ttf);font-weight:400}
+html,body{margin:0;background:transparent}
+.layer{width:1080px;height:1920px;position:relative;overflow:hidden}
+/* máscara: escurece o topo (onde vai a frase) e a base, deixando o centro respirar */
+.mask{position:absolute;inset:0;background:
+  linear-gradient(180deg,rgba(18,8,12,.35) 0%,rgba(18,8,12,0) 22%,rgba(18,8,12,0) 48%,rgba(18,8,12,.55) 66%,rgba(18,8,12,.82) 100%)}
+.text{position:absolute;left:96px;right:96px;bottom:var(--bottom,470px);text-align:center;color:#FBF3EA;
+  font-family:"Lora",serif;text-shadow:0 2px 24px rgba(0,0,0,.35)}
+.l1{font-style:italic;font-weight:500;font-size:var(--fs1,78px);line-height:1.2;letter-spacing:-.01em}
+.l2{font-style:italic;font-weight:600;font-size:var(--fs2,92px);line-height:1.15;color:#F2C4B4;margin-top:18px}
+.orn{display:flex;align-items:center;justify-content:center;gap:22px;margin-bottom:46px;color:#F2C4B4;
+  font-family:"Poppins";font-weight:400;font-size:24px;letter-spacing:.32em;text-transform:uppercase}
+.orn i{display:block;width:70px;height:1px;background:rgba(242,196,180,.7)}
+.handle{position:absolute;left:0;right:0;bottom:var(--hb,400px);text-align:center;font-family:"Poppins";font-weight:300;
+  font-size:30px;letter-spacing:.08em;color:rgba(251,243,234,.85)}
+</style></head><body><div class="layer" id="L"></div>
+<script>
+window.build = (o, part) => {
+  const L = document.getElementById('L');
+  const t = (inner) => `<div class="text" style="--bottom:${o.bottom||470}px;--fs1:${o.fs1||78}px;--fs2:${o.fs2||92}px">${inner}</div>`;
+  const orn = `<div class="orn"><i></i>${o.kicker||'nossa história'}<i></i></div>`;
+  const hidden = s => `<div style="visibility:hidden">${s}</div>`;
+  const l1 = `<div class="l1">${o.l1}</div>`, l2 = o.l2 ? `<div class="l2">${o.l2}</div>` : '';
+  L.innerHTML = {
+    mask: `<div class="mask"></div>`,
+    orn:  t(orn + hidden(l1 + l2)),
+    l1:   t(hidden(orn) + l1 + hidden(l2)),
+    l2:   t(hidden(orn + l1) + l2),
+    handle: `<div class="handle" style="--hb:${(o.bottom||470)-120}px">${o.handle||'@nossahistoria.a2'}</div>`,
+  }[part];
+};
+</script></body></html>
