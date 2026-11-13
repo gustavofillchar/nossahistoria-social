@@ -1,0 +1,65 @@
+name: Publicar no Instagram
+
+# Sem agendamento: publica quando o posts/gatilho.json muda (o Claude faz isso quando você pede)
+# ou quando você roda manualmente pela aba Actions.
+on:
+  push:
+    paths: ["posts/gatilho.json"]
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "Slug do post (pasta em posts/). Vazio = o do gatilho.json"
+        required: false
+        default: ""
+      dry_run:
+        description: "Só testar (monta o post na API, mas não publica)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publicar-instagram
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install pillow
+
+      - name: Gerar JPEGs
+        run: python scripts/ig_publish.py prepare ${{ inputs.slug && format('--slug {0}', inputs.slug) || '' }}
+
+      - name: Subir JPEGs (a API baixa as imagens por URL pública)
+        run: |
+          git config user.name "nossahistoria-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add posts
+          if ! git diff --cached --quiet; then
+            git commit -m "JPEGs para publicação via API"
+            git push
+            sleep 30
+          fi
+
+      - name: Publicar
+        env:
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+        run: python scripts/ig_publish.py publish ${{ inputs.slug && format('--slug {0}', inputs.slug) || '' }} ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: Registrar publicação
+        run: |
+          git add posts/publicados.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Registro de publicação"
+            git pull --rebase -q
+            git push
+          fi

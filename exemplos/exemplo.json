@@ -1,0 +1,17 @@
+[
+{"slug":"teste-frase","slides":[
+  {"type":"frase","text":"Amor não é só o frio na barriga do começo. É você lembrar que eu gosto do café <b>sem açúcar</b>, todo santo dia."}
+]},
+{"slug":"teste-conversa","slides":[
+  {"type":"conversa","title":"Toda sexta-feira:","msgs":[["ela","Onde você quer jantar?"],["ele","Tanto faz, amor."],["ela","Pizza?"],["ele","Pizza não."],["ela","Então escolhe."],["ele","Tanto faz."]]}
+]},
+{"slug":"teste-carrossel","slides":[
+  {"type":"capa","kicker":"declarações de amor","title":"Não sabe o que dizer? <em>Manda uma dessas</em>.","sub":"5 mensagens pra quem faz parte da sua história."},
+  {"type":"mensagem","text":"Eu escolheria você de novo. Em todas as versões da minha vida."},
+  {"type":"mensagem","text":"Meu lugar favorito no mundo ainda é aquele pedacinho do sofá do seu lado."},
+  {"type":"mensagem","text":"Obrigado por tornar os dias comuns os meus preferidos."},
+  {"type":"mensagem","text":"Se eu pudesse voltar no tempo, só pediria pra te conhecer mais cedo."},
+  {"type":"mensagem","text":"Você é a minha calma no meio da correria."},
+  {"type":"fim","title":"Qual delas você vai mandar?","sub":"Manda pra ele(a) e conta nos comentários 💌"}
+]}
+]

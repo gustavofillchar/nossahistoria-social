@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<style>
+@font-face{font-family:"Lora";src:url(fonts/Lora-Variable.ttf);font-weight:400 700;font-style:normal}
+@font-face{font-family:"Lora";src:url(fonts/Lora-Italic-Variable.ttf);font-weight:400 700;font-style:italic}
+@font-face{font-family:"Poppins";src:url(fonts/Poppins-Light.ttf);font-weight:300}
+@font-face{font-family:"Poppins";src:url(fonts/Poppins-Regular.ttf);font-weight:400}
+@font-face{font-family:"Poppins";src:url(fonts/Poppins-Medium.ttf);font-weight:500}
+
+:root{
+  --creme:#F7EFE6; --papel:#FBF6F0; --vinho:#6B1E2E; --vinho-2:#8E2F42;
+  --rose:#E8B4AC; --rose-2:#F3D6CF; --tinta:#2E1A1F; --cinza:#8A7377;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#ddd;font-family:"Poppins",sans-serif;color:var(--tinta)}
+section.slide{width:1080px;height:1350px;position:relative;overflow:hidden;display:flex;flex-direction:column;padding:96px 104px 72px}
+.t-creme{background:var(--creme)} .t-vinho{background:var(--vinho);color:var(--papel)} .t-rose{background:var(--rose-2)}
+.head{height:56px;display:flex;align-items:center;justify-content:space-between;font-size:26px;letter-spacing:.18em;text-transform:uppercase;color:var(--cinza);font-weight:400}
+.t-vinho .head{color:var(--rose)}
+.body{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0}
+.foot{height:56px;display:flex;align-items:center;justify-content:center;gap:14px;font-size:28px;color:var(--cinza);font-weight:400}
+.t-vinho .foot{color:var(--rose)}
+.heart{width:30px;height:28px;flex:none}
+.heart path{fill:var(--vinho-2)} .t-vinho .heart path{fill:var(--rose)}
+em,.hl{font-style:italic;color:var(--vinho-2)} .t-vinho em,.t-vinho .hl{color:var(--rose)}
+
+/* frase */
+.quote{font-family:"Lora",serif;font-style:italic;font-weight:500;font-size:var(--fs,76px);line-height:1.22;letter-spacing:-.01em}
+.quote b{font-weight:600;color:var(--vinho-2)} .t-vinho .quote b{color:var(--rose)}
+.mark{font-family:"Lora",serif;font-size:220px;line-height:.6;color:var(--rose);height:110px}
+.t-vinho .mark{color:var(--vinho-2)}
+.sign{margin-top:48px;font-size:32px;color:var(--cinza);font-weight:300}
+.t-vinho .sign{color:var(--rose)}
+
+/* conversa */
+.chat{display:flex;flex-direction:column;gap:22px}
+.msg{max-width:78%;padding:24px 36px;border-radius:40px;font-size:var(--fs,42px);line-height:1.32}
+.msg .who{display:block;font-size:24px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px;opacity:.7}
+.msg.ele{align-self:flex-start;background:var(--papel);border-bottom-left-radius:12px;box-shadow:0 6px 24px rgba(107,30,46,.08)}
+.msg.ela{align-self:flex-end;background:var(--vinho);color:var(--papel);border-bottom-right-radius:12px}
+.chat-title{font-family:"Lora",serif;font-style:italic;font-size:54px;line-height:1.2;margin-bottom:44px;text-align:center}
+
+/* capa de carrossel / pov / lista */
+.kicker{font-size:30px;letter-spacing:.2em;text-transform:uppercase;color:var(--vinho-2);margin-bottom:36px;font-weight:500}
+.t-vinho .kicker{color:var(--rose)}
+.big{font-family:"Lora",serif;font-weight:600;font-size:var(--fs,104px);line-height:1.08;letter-spacing:-.02em}
+.sub{margin-top:44px;font-size:38px;line-height:1.4;font-weight:300}
+.num{font-family:"Lora",serif;font-style:italic;font-size:120px;color:var(--rose);line-height:1;margin-bottom:28px}
+.t-vinho .num{color:var(--vinho-2)}
+.item-title{font-family:"Lora",serif;font-weight:600;font-size:var(--fs,68px);line-height:1.15}
+.item-body{margin-top:32px;font-size:40px;line-height:1.45;font-weight:300}
+.swipe{position:absolute;right:104px;bottom:150px;font-size:30px;color:var(--vinho-2);font-weight:500;letter-spacing:.06em}
+.t-vinho .swipe{color:var(--rose)}
+.center{text-align:center;align-items:center}
+.envelope{font-size:110px;margin-bottom:30px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const HANDLE = "@nossahistoria.a2";
+const HEART = '<svg class="heart" viewBox="0 0 32 30"><path d="M16 29C7 22 1 16.5 1 9.6 1 4.8 4.7 1 9.3 1c2.8 0 5.2 1.5 6.7 3.8C17.5 2.5 19.9 1 22.7 1 27.3 1 31 4.8 31 9.6 31 16.5 25 22 16 29z"/></svg>';
+const esc = s => s; // conteúdo é nosso (JSON do post); permite <em>, <b>, <br>
+
+function frame(i, theme, inner, opts={}){
+  const head = opts.head ?? "";
+  const pager = opts.total > 1 ? `${i}/${opts.total}` : "";
+  return `<section class="slide t-${theme||'creme'}" id="s${i}">
+    <div class="head"><span>${head}</span><span>${pager}</span></div>
+    <div class="body ${opts.center?'center':''}">${inner}</div>
+    <div class="foot">${HEART}<span>${HANDLE}</span></div>
+    ${opts.swipe?'<div class="swipe">arrasta →</div>':''}
+  </section>`;
+}
+
+const R = {
+  // frase romântica: {"type":"frase","text":"...","sign":"opcional","fs":76}
+  frase: (s,i,t) => frame(i, s.theme, `<div class="mark">“</div><div class="quote" style="--fs:${s.fs||76}px">${esc(s.text)}</div>${s.sign?`<div class="sign">— ${s.sign}</div>`:''}`, {total:t, head:s.head||""}),
+  // conversa: {"type":"conversa","title":"opcional","msgs":[["ele","..."],["ela","..."]],"fs":46}
+  conversa: (s,i,t) => frame(i, s.theme, `${s.title?`<div class="chat-title">${s.title}</div>`:''}<div class="chat">${s.msgs.map(([w,txt])=>`<div class="msg ${w}" style="--fs:${s.fs||46}px"><span class="who">${w==='ele'?(s.ele||'ele'):(s.ela||'ela')}</span>${txt}</div>`).join('')}</div>`, {total:t, head:s.head||""}),
+  // capa: {"type":"capa","kicker":"...","title":"...","sub":"...","fs":104}
+  capa: (s,i,t) => frame(i, s.theme||'vinho', `${s.kicker?`<div class="kicker">${s.kicker}</div>`:''}<div class="big" style="--fs:${s.fs||104}px">${s.title}</div>${s.sub?`<div class="sub">${s.sub}</div>`:''}`, {total:t, swipe:t>1 && i===1}),
+  // item de lista: {"type":"item","num":"01","title":"...","body":"..."}
+  item: (s,i,t) => frame(i, s.theme, `<div class="num">${s.num}</div><div class="item-title" style="--fs:${s.fs||68}px">${s.title}</div>${s.body?`<div class="item-body">${s.body}</div>`:''}`, {total:t, head:s.head||""}),
+  // mensagem pronta pra mandar: {"type":"mensagem","text":"...","fs":66}
+  mensagem: (s,i,t) => frame(i, s.theme||'rose', `<div class="kicker">${s.kicker||'manda pra ele(a)'}</div><div class="quote" style="--fs:${s.fs||66}px">${s.text}</div>`, {total:t}),
+  // fechamento: {"type":"fim","title":"...","sub":"..."}
+  fim: (s,i,t) => frame(i, s.theme||'vinho', `<div class="envelope">💌</div><div class="big" style="--fs:${s.fs||76}px">${s.title}</div>${s.sub?`<div class="sub">${s.sub}</div>`:''}`, {total:t, center:true}),
+};
+
+window.build = post => {
+  const t = post.slides.length;
+  document.getElementById('root').innerHTML = post.slides.map((s,k)=>{
+    if(!R[s.type]) throw new Error("tipo de slide desconhecido: "+s.type);
+    return R[s.type](s,k+1,t);
+  }).join('');
+};
+</script>
+</body>
+</html>
