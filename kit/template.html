@@ -72,6 +72,12 @@ section.slide>.head,section.slide>.body,section.slide>.foot{position:relative;z-
 .t-foto .foot{color:rgba(251,243,234,.9)} .t-foto .heart path{fill:#F2C4B4}
 .quote,.big,.sub{text-wrap:balance}
 .t-foto .head{color:rgba(251,243,234,.9);text-shadow:0 1px 8px rgba(0,0,0,.5)}
+
+/* story 9:16: zonas seguras (topo ~250px da barra de progresso/perfil, base ~340px da resposta) */
+body.story section.slide{height:1920px;padding:250px 104px 300px}
+body.story .head{display:none}
+body.story .t-foto .shade{background:linear-gradient(180deg,rgba(20,8,12,.45) 0%,rgba(20,8,12,.05) 25%,rgba(20,8,12,.1) 48%,rgba(20,8,12,.75) 72%,rgba(20,8,12,.9) 100%)}
+body.story .quote{font-size:calc(var(--fs,76px)*1.08)}
 </style>
 </head>
 <body>
@@ -112,7 +118,8 @@ const R = {
 };
 
 window.build = post => {
-  const t = post.slides.length;
+  document.body.classList.toggle('story', post.format === 'story');
+  const t = post.format === 'story' ? 1 : post.slides.length;
   document.getElementById('root').innerHTML = post.slides.map((s,k)=>{
     if(!R[s.type]) throw new Error("tipo de slide desconhecido: "+s.type);
     return R[s.type](s,k+1,t);

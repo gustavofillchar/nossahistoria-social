@@ -9,7 +9,8 @@ Uso:
 
 posts/gatilho.json: {"slug": "AAAA-MM-DD-tema", "dry_run": false}
 Variáveis de ambiente (GitHub Secrets): IG_TOKEN, IG_USER_ID.
-1 arte = post de imagem única; 2 a 10 artes = carrossel; posts/<slug>/<slug>.mp4 = Reel.
+1 arte = post de imagem única; 2 a 10 artes = carrossel; posts/<slug>/<slug>.mp4 = Reel;
+"format": "story" no JSON = cada arte vira um story (1080x1920).
 Já publicados ficam em posts/publicados.json, para nunca publicar duas vezes.
 """
 import argparse, glob, json, os, sys, time, urllib.error, urllib.parse, urllib.request
@@ -100,6 +101,8 @@ def publish(post, dry_run):
         container = api("POST", f"{uid}/media", **params)["id"]
         return finish(post, log, uid, container, dry_run, "reel")
     urls = [RAW + os.path.relpath(p[:-4] + ".jpg", ROOT) for p in slides(post["slug"])]
+    if post.get("format") == "story":
+        return publish_stories(post, log, uid, urls, dry_run)
     if not 1 <= len(urls) <= 10:
         sys.exit(f"O post precisa de 1 a 10 imagens; {post['slug']} tem {len(urls)}")
     if len(urls) == 1:
@@ -119,6 +122,27 @@ def publish(post, dry_run):
         container = api("POST", f"{uid}/media", media_type="CAROUSEL",
                         children=",".join(children), caption=caption)["id"]
     return finish(post, log, uid, container, dry_run, f"{len(urls)} imagem(ns)")
+
+
+def publish_stories(post, log, uid, urls, dry_run):
+    """Cada imagem vira um story, publicado em sequência (stories não têm legenda)."""
+    links = []
+    for k, u in enumerate(urls, 1):
+        c = api("POST", f"{uid}/media", media_type="STORIES", image_url=u)["id"]
+        wait_ready(c)
+        if dry_run:
+            continue
+        mid = api("POST", f"{uid}/media_publish", creation_id=c)["id"]
+        links.append(mid)
+        print(f"Story {k}/{len(urls)} publicado")
+        time.sleep(3)
+    if dry_run:
+        print(f"Teste ok: {len(urls)} stories aceitos pelo Instagram, mas NÃO publicados (dry run).")
+        return
+    log[post["slug"]] = {"media_ids": links, "permalink": f"https://www.instagram.com/stories/{post.get('handle', 'nossahistoria.a2')}/",
+                         "published_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+    json.dump(log, open(LOG, "w"), indent=1, ensure_ascii=False)
+    print(f"Publicado: {len(links)} stories em {log[post['slug']]['permalink']}")
 
 
 def finish(post, log, uid, container, dry_run, what):

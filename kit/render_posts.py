@@ -21,7 +21,7 @@ CHECK = """[...document.querySelectorAll('section')].filter(s=>{
 
 with sync_playwright() as p:
     b = p.chromium.launch()
-    pg = b.new_page(viewport={"width": 1080, "height": 1350})
+    pg = b.new_page(viewport={"width": 1080, "height": 1920})
     pg.goto((kit / "template.html").as_uri())
     for post in posts:
         pg.evaluate("p => window.build(p)", post)
