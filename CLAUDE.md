@@ -33,6 +33,6 @@ Depois `posts/gatilho.json` = `{"slug": "<slug>", "dry_run": false}` e push: a A
 `posts/publicados.json`. Acompanhar com `gh run list/view` e devolver o link.
 
 ## Reel em pixel art (série "o jogo do casal")
-`kit/pixel/casal_jogo.py saida.mp4` desenha tudo em código (grade 180x320 ampliada 6x) e sintetiza os sons chiptune.
+`kit/pixel/casal_jogo.py` (ep. 1, grade 180x320) e `kit/pixel/fazer_pazes.py` (ep. 2, grade 270x480, personagens mais detalhados: usar esse como base) desenham tudo em código (grade 180x320 ampliada 6x) e sintetiza os sons chiptune.
 Personagens originais em `char()`, fonte própria em `kit/pixel/pixfont.py` (só maiúsculas). Para novos episódios, criar novas cenas
 no mesmo arquivo/estilo reaproveitando `char`, `hud`, `banner`, `dialog` e `audio`. Conferir quadros com `--frames t1,t2 dir` antes de renderizar.
