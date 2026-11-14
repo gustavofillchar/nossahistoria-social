@@ -31,3 +31,8 @@ nunca letra de música nem trecho de poeta com direitos (Vinicius, Quintana, Ner
 Reel: `posts/<slug>/<slug>.mp4` + `posts/<slug>.json` (`caption`, `alt`, `thumb_offset` em ms). Imagens: `posts/<slug>/<slug>-NN.png`.
 Depois `posts/gatilho.json` = `{"slug": "<slug>", "dry_run": false}` e push: a Action "Publicar no Instagram" publica e registra em
 `posts/publicados.json`. Acompanhar com `gh run list/view` e devolver o link.
+
+## Reel em pixel art (série "o jogo do casal")
+`kit/pixel/casal_jogo.py saida.mp4` desenha tudo em código (grade 180x320 ampliada 6x) e sintetiza os sons chiptune.
+Personagens originais em `char()`, fonte própria em `kit/pixel/pixfont.py` (só maiúsculas). Para novos episódios, criar novas cenas
+no mesmo arquivo/estilo reaproveitando `char`, `hud`, `banner`, `dialog` e `audio`. Conferir quadros com `--frames t1,t2 dir` antes de renderizar.
