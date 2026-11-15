@@ -85,6 +85,19 @@ body.story .quote{font-size:calc(var(--fs,76px)*1.08)}
 .ano-pre{font-family:"Lora",serif;font-style:italic;font-weight:500;font-size:84px;line-height:1;text-align:center}
 .ano-num{font-family:"Lora",serif;font-weight:600;font-size:300px;line-height:1;letter-spacing:-.04em;text-align:center;margin-top:18px;color:var(--acc)}
 .ano-hint{position:absolute;left:0;right:0;bottom:150px;text-align:center;font-size:28px;letter-spacing:.12em;color:var(--acc);font-weight:500;z-index:6}
+
+/* cidade: foto inteira, frase centralizada */
+.t-cidade{background:#1b0d12;color:#FBF3EA}
+.t-cidade .bg{position:absolute;inset:0;background-size:cover;background-position:var(--pos,center);filter:saturate(.95) contrast(1.03);z-index:1}
+.t-cidade .shade{position:absolute;inset:0;z-index:2;background:radial-gradient(80% 55% at 50% 50%,rgba(20,8,12,.48) 0%,rgba(20,8,12,.30) 60%,rgba(20,8,12,.55) 100%)}
+.t-cidade .head,.t-cidade .foot{color:rgba(251,243,234,.92);text-shadow:0 1px 10px rgba(0,0,0,.5)} .t-cidade .heart path{fill:#F2C4B4}
+.cid-q{font-family:"Lora",serif;font-style:italic;font-weight:500;font-size:var(--fs,92px);line-height:1.15;text-align:center;text-wrap:balance;
+  text-shadow:0 3px 30px rgba(0,0,0,.45)}
+.cid-q b{font-weight:600;color:#F2C4B4}
+.cid-name{margin-top:44px;text-align:center;font-family:"Poppins";font-weight:500;font-size:32px;letter-spacing:.32em;text-transform:uppercase;
+  color:#F2C4B4;text-shadow:0 1px 12px rgba(0,0,0,.5)}
+.cid-hint{position:absolute;left:0;right:0;bottom:150px;text-align:center;z-index:6;font-family:"Poppins";font-weight:500;font-size:28px;
+  letter-spacing:.12em;color:rgba(251,243,234,.9)}
 </style>
 </head>
 <body>
@@ -114,6 +127,8 @@ const R = {
   foto: (s,i,t) => frame(i, 'foto', `<div class="mark">“</div><div class="quote" style="--fs:${s.fs||70}px">${s.text}</div>`, {total:t, img:s.img, pos:s.pos, grain:s.grain}),
   // ano: {"type":"ano","year":"2000","bg":"#F7EFE6","fg":"#2E1A1F","acc":"#8E2F42","hint":"opcional","grain":.5}
   ano: (s,i,t) => frame(i, 'ano', (s.year==='...' ? `<div class="ano-pre" style="font-size:132px;line-height:1.1">te amo<br>desde...</div>` : `<div class="ano-pre">te amo desde</div><div class="ano-num">${s.year}</div>`) + `${s.hint?`<div class="ano-hint">${s.hint}</div>`:''}`, {total:t, center:true, grain:s.grain, vars:`--bgc:${s.bg};--fgc:${s.fg};--acc:${s.acc}`}),
+  // cidade: {"type":"cidade","img":"../fotos/x.jpg","city":"Paris","text":"...","hint":"opcional","pos":"center"}
+  cidade: (s,i,t) => frame(i, 'cidade', `<div class="cid-q" style="--fs:${s.fs||92}px">${s.text}</div><div class="cid-name">📍 ${s.city}</div>${s.hint?`<div class="cid-hint">${s.hint}</div>`:''}`, {total:t, img:s.img, pos:s.pos, center:true}),
   // conversa: {"type":"conversa","title":"opcional","msgs":[["ele","..."],["ela","..."]],"fs":46}
   conversa: (s,i,t) => frame(i, s.theme, `${s.title?`<div class="chat-title">${s.title}</div>`:''}<div class="chat">${s.msgs.map(([w,txt])=>`<div class="msg ${w}" style="--fs:${s.fs||46}px"><span class="who">${w==='ele'?(s.ele||'ele'):(s.ela||'ela')}</span>${txt}</div>`).join('')}</div>`, {total:t, head:s.head||""}),
   // capa: {"type":"capa","kicker":"...","title":"...","sub":"...","fs":104}
