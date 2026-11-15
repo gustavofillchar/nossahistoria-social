@@ -31,6 +31,7 @@ Marque com [usada AAAA-MM-DD] quando a frase sair num post.
 - O amor não se vê com os olhos, mas com o coração. (Shakespeare)
 
 ## Originais no mesmo tom (escritas para a página)
+- Ainda vou estar com você neste lugar. (carrossel de cidades) [usada 2026-11-15]
 - Não é sobre o primeiro beijo. É sobre continuar segurando a mão depois de tantos anos.
 - Eu queria te dizer uma coisa... No meio de tanta gente, foi você que o meu coração escolheu.
 - Se eu pudesse voltar no tempo, escolheria você de novo. [usada 2026-11-13]
