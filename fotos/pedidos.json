@@ -1,8 +1,82 @@
 {
- "casal-romantico": {"query": "romantic couple", "orientation": "portrait", "n": 6},
- "casal-abraco": {"query": "couple hugging", "orientation": "portrait", "n": 5},
- "casal-maos": {"query": "couple holding hands", "orientation": "portrait", "n": 5},
- "casal-idoso": {"query": "elderly couple love", "orientation": "portrait", "n": 6},
- "casal-idoso-maos": {"query": "old couple holding hands", "orientation": "portrait", "n": 5},
- "casal-por-do-sol": {"query": "couple sunset silhouette", "orientation": "portrait", "n": 4}
+ "casal-romantico": {
+  "query": "romantic couple",
+  "orientation": "portrait",
+  "n": 6
+ },
+ "casal-abraco": {
+  "query": "couple hugging",
+  "orientation": "portrait",
+  "n": 5
+ },
+ "casal-maos": {
+  "query": "couple holding hands",
+  "orientation": "portrait",
+  "n": 5
+ },
+ "casal-idoso": {
+  "query": "elderly couple love",
+  "orientation": "portrait",
+  "n": 6
+ },
+ "casal-idoso-maos": {
+  "query": "old couple holding hands",
+  "orientation": "portrait",
+  "n": 5
+ },
+ "casal-por-do-sol": {
+  "query": "couple sunset silhouette",
+  "orientation": "portrait",
+  "n": 4
+ },
+ "cidade-paris": {
+  "query": "paris eiffel tower",
+  "orientation": "portrait",
+  "n": 2
+ },
+ "cidade-roma": {
+  "query": "rome colosseum",
+  "orientation": "portrait",
+  "n": 2
+ },
+ "cidade-nova-york": {
+  "query": "new york city skyline",
+  "orientation": "portrait",
+  "n": 2
+ },
+ "cidade-sao-paulo": {
+  "query": "sao paulo city",
+  "orientation": "portrait",
+  "n": 2
+ },
+ "cidade-rio": {
+  "query": "rio de janeiro sugarloaf",
+  "orientation": "portrait",
+  "n": 2
+ },
+ "cidade-veneza": {
+  "query": "venice canal",
+  "orientation": "portrait",
+  "n": 2
+ },
+ "cidade-santorini": {
+  "query": "santorini oia sunset",
+  "orientation": "portrait",
+  "n": 2
+ },
+ "cidade-toquio": {
+  "query": "tokyo street night",
+  "orientation": "portrait",
+  "n": 2
+ },
+ "cidade-lisboa": {
+  "query": "lisbon tram",
+  "orientation": "portrait",
+  "n": 2
+ },
+ "cidade-londres": {
+  "query": "london big ben",
+  "orientation": "portrait",
+  "n": 2
+ }
 }
