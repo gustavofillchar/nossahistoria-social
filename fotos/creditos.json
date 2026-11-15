@@ -184,5 +184,125 @@
   "autor": "Andrey Câmara",
   "link": "https://unsplash.com/photos/silhouette-of-man-and-woman-hugging-on-shore-80_6jJ97c-U",
   "descricao": "silhouette of man and woman hugging on shore"
+ },
+ "cidade-paris-1": {
+  "id": "Q0-fOL2nqZc",
+  "autor": "Anthony DELANOIX",
+  "link": "https://unsplash.com/photos/eiffel-tower-during-daytime-Q0-fOL2nqZc",
+  "descricao": "Eiffel tower during daytime"
+ },
+ "cidade-paris-2": {
+  "id": "WSvth_lwCi0",
+  "autor": "cyril mzn",
+  "link": "https://unsplash.com/photos/eiffel-tower-under-blue-sky-during-daytime-WSvth_lwCi0",
+  "descricao": "Eiffel Tower under blue sky during daytime"
+ },
+ "cidade-roma-1": {
+  "id": "ckotRXopwRM",
+  "autor": "Spencer Davis",
+  "link": "https://unsplash.com/photos/aerial-view-of-colosseum-at-rome-italy-ckotRXopwRM",
+  "descricao": "aerial view of Colosseum at Rome Italy"
+ },
+ "cidade-roma-2": {
+  "id": "RNkEeWhRT7k",
+  "autor": "Jorgen Hendriksen",
+  "link": "https://unsplash.com/photos/brown-concrete-building-under-white-sky-during-daytime-RNkEeWhRT7k",
+  "descricao": "brown concrete building under white sky during daytime"
+ },
+ "cidade-nova-york-1": {
+  "id": "fT6-YkB0nfg",
+  "autor": "Timo Wagner",
+  "link": "https://unsplash.com/photos/empire-state-building-new-york-at-night-fT6-YkB0nfg",
+  "descricao": "Empire State Building, New York at night"
+ },
+ "cidade-nova-york-2": {
+  "id": "rfj_wOYQkus",
+  "autor": "Triston Dunn",
+  "link": "https://unsplash.com/photos/empire-state-building-new-york-city-during-daytime-rfj_wOYQkus",
+  "descricao": "Empire State Building, New York City during daytime"
+ },
+ "cidade-sao-paulo-1": {
+  "id": "UzN-d1g4moY",
+  "autor": "Bianca Monteiro",
+  "link": "https://unsplash.com/photos/aerial-photo-of-city-buildings-during-daytime-UzN-d1g4moY",
+  "descricao": "aerial photo of city buildings during daytime"
+ },
+ "cidade-sao-paulo-2": {
+  "id": "L-vnYS1p6l4",
+  "autor": "Gabriel Ramos",
+  "link": "https://unsplash.com/photos/aerial-view-of-buildings-during-daytime-L-vnYS1p6l4",
+  "descricao": "aerial view of buildings during daytime"
+ },
+ "cidade-rio-1": {
+  "id": "cG2JQnPfmAw",
+  "autor": "Davi Costa",
+  "link": "https://unsplash.com/photos/white-cable-car-traversing-on-top-of-hills-overlooking-city-by-bay-cG2JQnPfmAw",
+  "descricao": "white cable car traversing on top of hills overlooking city by bay"
+ },
+ "cidade-rio-2": {
+  "id": "GTLJklnjn-E",
+  "autor": "Agustin Diaz Gargiulo",
+  "link": "https://unsplash.com/photos/christ-the-redeemer-GTLJklnjn-E",
+  "descricao": "Christ The Redeemer"
+ },
+ "cidade-veneza-1": {
+  "id": "hFXZ5cNfkOk",
+  "autor": "Damiano Baschiera",
+  "link": "https://unsplash.com/photos/rialto-bridge-venice-italy-hFXZ5cNfkOk",
+  "descricao": "Rialto Bridge, Venice Italy"
+ },
+ "cidade-veneza-2": {
+  "id": "KtlBp_YttlY",
+  "autor": "Damiano Baschiera",
+  "link": "https://unsplash.com/photos/canal-between-buildings-during-daytime-KtlBp_YttlY",
+  "descricao": "canal between buildings during daytime"
+ },
+ "cidade-santorini-1": {
+  "id": "E4zwU1iLHFc",
+  "autor": "Damien Schneider",
+  "link": "https://unsplash.com/photos/a-city-on-the-water-E4zwU1iLHFc",
+  "descricao": "a city on the water"
+ },
+ "cidade-santorini-2": {
+  "id": "7GeepyXAw84",
+  "autor": "Tânia Mousinho",
+  "link": "https://unsplash.com/photos/the-sun-is-setting-over-the-water-and-buildings-7GeepyXAw84",
+  "descricao": "the sun is setting over the water and buildings"
+ },
+ "cidade-toquio-1": {
+  "id": "yVUQlyRlJSw",
+  "autor": "Valentin BEAUVAIS",
+  "link": "https://unsplash.com/photos/wet-street-at-night-in-tokyo-yVUQlyRlJSw",
+  "descricao": "A wet street at night in Tokyo with neon lights reflecting on the pavement"
+ },
+ "cidade-toquio-2": {
+  "id": "tKCd-IWc4gI",
+  "autor": "Yoav Aziz",
+  "link": "https://unsplash.com/photos/people-walking-through-narrow-tokyo-alleyway-tKCd-IWc4gI",
+  "descricao": "People walking through a narrow alleyway in Tokyo illuminated by glowing paper lanterns"
+ },
+ "cidade-lisboa-1": {
+  "id": "oiVvB-A7XDM",
+  "autor": "Henry Ren",
+  "link": "https://unsplash.com/photos/a-couple-of-yellow-trolleys-driving-down-a-street-oiVvB-A7XDM",
+  "descricao": "a couple of yellow trolleys driving down a street"
+ },
+ "cidade-lisboa-2": {
+  "id": "WVVmRyJ98XY",
+  "autor": "Julian Dik",
+  "link": "https://unsplash.com/photos/yellow-and-white-train-near-building-WVVmRyJ98XY",
+  "descricao": "yellow and white train near building"
+ },
+ "cidade-londres-1": {
+  "id": "MdJq0zFUwrw",
+  "autor": "enrico bet",
+  "link": "https://unsplash.com/photos/big-ben-london-MdJq0zFUwrw",
+  "descricao": "Big Ben, London"
+ },
+ "cidade-londres-2": {
+  "id": "13jqPjlPwwE",
+  "autor": "Yoav Aziz",
+  "link": "https://unsplash.com/photos/a-large-clock-tower-towering-over-a-city-13jqPjlPwwE",
+  "descricao": "a large clock tower towering over a city"
  }
 }
