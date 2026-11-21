@@ -36,3 +36,8 @@ Depois `posts/gatilho.json` = `{"slug": "<slug>", "dry_run": false}` e push: a A
 `kit/pixel/casal_jogo.py` (ep. 1, grade 180x320) e `kit/pixel/fazer_pazes.py` (ep. 2, grade 270x480, personagens mais detalhados: usar esse como base) desenham tudo em código (grade 180x320 ampliada 6x) e sintetiza os sons chiptune.
 Personagens originais em `char()`, fonte própria em `kit/pixel/pixfont.py` (só maiúsculas). Para novos episódios, criar novas cenas
 no mesmo arquivo/estilo reaproveitando `char`, `hud`, `banner`, `dialog` e `audio`. Conferir quadros com `--frames t1,t2 dir` antes de renderizar.
+
+## Reel em 3D low-poly
+`kit/3d/casamento.html` é um mini motor WebGL2 (sem bibliotecas) com `person()`, `car()`, `palm()`, `church()`, `world()` e a interface em HTML por cima;
+`kit/3d/render_casamento.py saida.mp4` filma quadro a quadro no Chromium (uns 8 min) e sintetiza a trilha. Conferir antes com `--frames t1,t2 dir`.
+Estilo "jogo de mundo aberto" genérico e original: nunca usar nome, logo, personagens ou interface de jogos reais.

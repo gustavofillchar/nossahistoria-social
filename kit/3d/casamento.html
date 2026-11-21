@@ -1,0 +1,312 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:P;src:url(../fonts/Poppins-Regular.ttf);font-weight:400}
+@font-face{font-family:P;src:url(../fonts/Poppins-Medium.ttf);font-weight:600}
+@font-face{font-family:P;src:url(../fonts/Poppins-Bold.ttf);font-weight:700}
+@font-face{font-family:P;src:url(../fonts/Poppins-BoldItalic.ttf);font-weight:700;font-style:italic}
+html,body{margin:0;background:#000}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:P,sans-serif;color:#fff}
+canvas{position:absolute;inset:0;filter:saturate(1.18) contrast(1.07)}
+#vig{position:absolute;inset:0;background:radial-gradient(90% 70% at 50% 48%,transparent 55%,rgba(10,0,20,.55) 100%);pointer-events:none}
+#hud{position:absolute;inset:0;text-shadow:0 3px 0 rgba(0,0,0,.75),0 0 16px rgba(0,0,0,.55)}
+#fade{position:absolute;inset:0;background:#000;opacity:0}
+.abs{position:absolute}
+.obj{left:90px;right:90px;bottom:372px;text-align:center;font-weight:600;font-size:42px;line-height:1.25}
+.y{color:#FFD34D}.r{color:#FF6464}.pk{color:#FF8FB8}.g{color:#7CF29A}
+.mini{left:56px;bottom:520px;width:250px;height:250px;border-radius:50%;border:7px solid rgba(255,255,255,.9);overflow:hidden;background:#1b2a35;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+.money{right:64px;top:268px;text-align:right}
+.money small{display:block;font-size:26px;font-weight:600;letter-spacing:.14em;opacity:.9}
+.money b{font-size:62px;font-weight:700;color:#7CF29A;line-height:1.05}
+.alert{right:64px;top:400px;text-align:right;font-weight:700;font-size:28px;letter-spacing:.1em}
+.alert i{display:inline-block;width:40px;height:40px;margin-left:8px;border-radius:50%;border:5px solid #fff;box-sizing:border-box;box-shadow:0 3px 0 rgba(0,0,0,.6)}
+.alert i.on{background:#FF4B4B;border-color:#FFD34D}
+.phone{left:56px;top:270px;width:600px;background:rgba(18,16,28,.86);border-radius:28px;padding:22px 26px;box-sizing:border-box;text-shadow:none;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.phone .av{float:left;width:76px;height:76px;border-radius:50%;background:#FF8FB8;margin-right:20px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:38px}
+.phone .n{font-weight:700;font-size:28px;color:#FF8FB8}.phone .m{font-size:32px;font-weight:600;line-height:1.2}
+.phone .tr{clear:both;padding-top:14px;font-size:26px;font-weight:700;color:#FFD34D;letter-spacing:.04em}
+.ban{left:0;right:0;top:700px;text-align:center}
+.ban .in{display:inline-block;background:linear-gradient(90deg,rgba(0,0,0,0),rgba(12,8,24,.88) 14%,rgba(12,8,24,.88) 86%,rgba(0,0,0,0));padding:26px 120px}
+.ban small{display:block;font-weight:700;font-size:34px;letter-spacing:.3em;color:#FFD34D}
+.ban b{display:block;font-weight:700;font-style:italic;font-size:66px;line-height:1.08;text-transform:uppercase}
+.big{left:0;right:0;text-align:center;font-weight:700;font-style:italic;text-transform:uppercase;line-height:1}
+.tag{transform:translate(-50%,-100%);background:rgba(12,8,24,.85);border-radius:14px;padding:8px 20px;font-weight:700;font-size:28px;white-space:nowrap;text-shadow:none}
+.tag small{color:#FF6464;font-size:22px;margin-left:10px}
+.boss{left:140px;right:140px;top:430px;text-align:center;font-weight:700;font-size:32px;letter-spacing:.12em}
+.boss .bar{margin-top:10px;height:26px;background:rgba(0,0,0,.65);border:4px solid #fff;border-radius:8px;overflow:hidden}
+.boss .bar div{height:100%;background:linear-gradient(90deg,#FF4B4B,#FFB14B)}
+.sub{left:70px;right:70px;top:1180px;text-align:center;font-weight:700;font-size:54px;line-height:1.15}
+.stat{left:150px;right:150px;display:flex;justify-content:space-between;font-weight:700;font-size:42px;border-bottom:3px solid rgba(255,255,255,.35);padding-bottom:10px}
+.bars:before,.bars:after{content:"";position:absolute;left:0;right:0;height:var(--h,0px);background:#000}.bars:before{top:0}.bars:after{bottom:0}
+</style></head><body><div id="stage"><canvas id="c" width="1080" height="1920"></canvas><div id="vig"></div><div id="hud"></div><div id="fade"></div></div>
+<script>
+"use strict";
+// ============================================================ mini motor 3D (WebGL2 puro)
+const cv=document.getElementById('c'),gl=cv.getContext('webgl2',{antialias:true,stencil:true,preserveDrawingBuffer:true});
+const W=1080,H=1920;
+const I=()=>new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);
+function mul(a,b){const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+r]*b[c*4+k];o[c*4+r]=s}return o}
+const Tm=(x,y,z)=>{const m=I();m[12]=x;m[13]=y;m[14]=z;return m};
+const Sm=(x,y,z)=>{const m=I();m[0]=x;m[5]=y;m[10]=z;return m};
+function Rm(ax,a){const m=I(),c=Math.cos(a),s=Math.sin(a);
+  if(ax==='x'){m[5]=c;m[6]=s;m[9]=-s;m[10]=c}else if(ax==='y'){m[0]=c;m[2]=-s;m[8]=s;m[10]=c}else{m[0]=c;m[1]=s;m[4]=-s;m[5]=c}return m}
+function persp(fy,as,n,f){const m=new Float32Array(16),q=1/Math.tan(fy/2);m[0]=q/as;m[5]=q;m[10]=(f+n)/(n-f);m[11]=-1;m[14]=2*f*n/(n-f);return m}
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const norm=a=>{const l=Math.hypot(...a)||1;return[a[0]/l,a[1]/l,a[2]/l]};
+function lookAt(e,c){const z=norm(sub(e,c)),x=norm(cross([0,1,0],z)),y=cross(z,x);
+  return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dot(x,e),-dot(y,e),-dot(z,e),1])}
+let M=I();const st=[];
+const push=()=>st.push(M),pop=()=>{M=st.pop()},T=(x,y,z)=>{M=mul(M,Tm(x,y,z))},R=(ax,a)=>{M=mul(M,Rm(ax,a))},
+  S=(x,y,z)=>{M=mul(M,Sm(x,y===undefined?x:y,z===undefined?x:z))};
+
+function sh(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s}
+function prog(vs,fs){const p=gl.createProgram();gl.attachShader(p,sh(gl.VERTEX_SHADER,vs));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs));
+  gl.bindAttribLocation(p,0,'aP');gl.bindAttribLocation(p,1,'aN');gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p));
+  const u={};const n=gl.getProgramParameter(p,gl.ACTIVE_UNIFORMS);for(let i=0;i<n;i++){const a=gl.getActiveUniform(p,i);u[a.name]=gl.getUniformLocation(p,a.name)}return{p,u}}
+const P3=prog(`#version 300 es
+in vec3 aP;in vec3 aN;uniform mat4 uVP,uM;out vec3 vN,vW;
+void main(){vec4 w=uM*vec4(aP,1.);vW=w.xyz;vN=mat3(uM)*aN;gl_Position=uVP*w;}`,`#version 300 es
+precision highp float;in vec3 vN,vW;out vec4 o;
+uniform vec3 uCol,uSunDir,uSunCol,uSky,uGnd,uFog,uCam,uPtPos,uPtCol;uniform float uEmis,uFogDen,uFlat,uAlpha;
+void main(){ if(uFlat>.5){o=vec4(uCol,uAlpha);return;}
+  vec3 n=normalize(vN); if(!gl_FrontFacing)n=-n;
+  vec3 amb=mix(uGnd,uSky,n.y*.5+.5);
+  float d=max(dot(n,uSunDir),0.);
+  vec3 lp=uPtPos-vW;float pl=max(dot(n,normalize(lp)),0.)/(1.+dot(lp,lp)*.03);
+  float rim=pow(1.-max(dot(n,normalize(uCam-vW)),0.),3.)*.25;
+  vec3 c=uCol*(amb+uSunCol*d+uPtCol*pl)+uSunCol*rim*uCol+uCol*uEmis;
+  float f=1.-exp(-distance(uCam,vW)*uFogDen); c=mix(c,uFog,f*(1.-min(uEmis,1.)*.6));
+  o=vec4(c,uAlpha);}`);
+const PS=prog(`#version 300 es
+in vec3 aP;out vec2 v;void main(){v=aP.xy;gl_Position=vec4(aP.xy,.9999,1.);}`,`#version 300 es
+precision highp float;in vec2 v;out vec4 o;uniform vec3 uTop,uMid,uHor,uSunC;uniform vec2 uSun;uniform float uHy,uSunOn;
+float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+void main(){float y=(v.y-uHy)*.9;vec3 c=y<0.?uHor*.8:mix(uHor,mix(uMid,uTop,smoothstep(.25,1.1,y)),smoothstep(0.,.3,y));
+  vec2 d=(v-uSun)*vec2(.5625,1.);float r=length(d);
+  c+=uSunOn*uSunC*(exp(-r*5.)*.55+smoothstep(.085,.075,r)*.9);
+  float band=sin(v.y*46.+1.3);                       // faixas no sol
+  if(uSunOn>.5&&r<.08&&v.y<uSun.y-.005&&band>.55)c=mix(c,uHor,.55);
+  if(uSunOn<.5){vec2 g=floor(gl_FragCoord.xy/3.);c+=step(.997,h(g))*max(y,0.)*1.2;}
+  o=vec4(c,1.);}`);
+
+function mesh(pos,nor){const vao=gl.createVertexArray();gl.bindVertexArray(vao);
+  for(const [i,a] of [[0,pos],[1,nor]]){const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(a),gl.STATIC_DRAW);gl.enableVertexAttribArray(i);gl.vertexAttribPointer(i,3,gl.FLOAT,false,0,0)}
+  return{vao,n:pos.length/3}}
+function tri(P,N,a,b,c,n){P.push(...a,...b,...c);if(!n)n=norm(cross(sub(b,a),sub(c,a)));if(typeof n[0]==='number')N.push(...n,...n,...n);else N.push(...n[0],...n[1],...n[2])}
+function quadf(P,N,a,b,c,d,n){const fl=n&&typeof n[0]==='number';tri(P,N,a,b,c,n&&(fl?n:[n[0],n[1],n[2]]));tri(P,N,a,c,d,n&&(fl?n:[n[0],n[2],n[3]]))}
+const BOX=(()=>{const P=[],N=[],v=(x,y,z)=>[x*.5,y*.5,z*.5];
+  for(const [n,u,w] of [[[1,0,0],[0,1,0],[0,0,1]],[[-1,0,0],[0,0,1],[0,1,0]],[[0,1,0],[0,0,1],[1,0,0]],[[0,-1,0],[1,0,0],[0,0,1]],[[0,0,1],[1,0,0],[0,1,0]],[[0,0,-1],[0,1,0],[1,0,0]]]){
+    const p=(a,b)=>v(n[0]+u[0]*a+w[0]*b,n[1]+u[1]*a+w[1]*b,n[2]+u[2]*a+w[2]*b);quadf(P,N,p(-1,-1),p(1,-1),p(1,1),p(-1,1),n)}return mesh(P,N)})();
+const CYL=(()=>{const P=[],N=[],n=14;for(let i=0;i<n;i++){const a=i/n*6.2832,b=(i+1)/n*6.2832,ca=Math.cos(a),sa=Math.sin(a),cb=Math.cos(b),sb=Math.sin(b);
+  quadf(P,N,[ca,0,sa],[ca,1,sa],[cb,1,sb],[cb,0,sb],[[ca,0,sa],[ca,0,sa],[cb,0,sb],[cb,0,sb]]);tri(P,N,[0,1,0],[cb,1,sb],[ca,1,sa],[0,1,0]);tri(P,N,[0,0,0],[ca,0,sa],[cb,0,sb],[0,-1,0])}return mesh(P,N)})();
+const CONE=(()=>{const P=[],N=[],n=14;for(let i=0;i<n;i++){const a=i/n*6.2832,b=(i+1)/n*6.2832,ca=Math.cos(a),sa=Math.sin(a),cb=Math.cos(b),sb=Math.sin(b),m=(a+b)/2;
+  tri(P,N,[ca,0,sa],[0,1,0],[cb,0,sb],[norm([ca,.7,sa]),norm([Math.cos(m),.7,Math.sin(m)]),norm([cb,.7,sb])]);tri(P,N,[0,0,0],[ca,0,sa],[cb,0,sb],[0,-1,0])}return mesh(P,N)})();
+const SPH=(()=>{const P=[],N=[],nu=14,nv=9,p=(i,j)=>{const a=i/nu*6.2832,b=j/nv*3.1416;return[Math.sin(b)*Math.cos(a),Math.cos(b),Math.sin(b)*Math.sin(a)]};
+  for(let i=0;i<nu;i++)for(let j=0;j<nv;j++){const a=p(i,j),b=p(i+1,j),c=p(i+1,j+1),d=p(i,j+1);quadf(P,N,a,b,c,d,[a,b,c,d])}return mesh(P,N)})();
+const PRISM=(()=>{const P=[],N=[],a=[-.5,0,-.5],b=[.5,0,-.5],c=[0,1,-.5],d=[-.5,0,.5],e=[.5,0,.5],f=[0,1,.5];
+  tri(P,N,a,c,b);tri(P,N,d,e,f);quadf(P,N,a,d,f,c);quadf(P,N,e,b,c,f);quadf(P,N,a,b,e,d);return mesh(P,N)})();
+const QUAD=(()=>{const P=[],N=[];quadf(P,N,[-.5,0,-.5],[-.5,0,.5],[.5,0,.5],[.5,0,-.5],[0,1,0]);return mesh(P,N)})();
+const FS=mesh([-1,-1,0,3,-1,0,-1,3,0],[0,0,1,0,0,1,0,0,1]);
+
+let list=[],glow=[],ENV,CAM,VP;
+function draw(m,col,o){o=o||{};list.push({m,M,col,e:o.e||0,sh:o.sh!==false&&!o.e});}
+function beam(m,col,a){glow.push({m,M,col,a})}
+const SUNSET={sun:norm([.22,.3,.93]),sunCol:[1.05,.74,.5],sky:[.62,.5,.66],gnd:[.55,.42,.4],fog:[.98,.6,.5],den:.0042,top:[.2,.2,.5],mid:[.93,.42,.55],hor:[1,.66,.42],sunC:[1,.88,.6],sunOn:1,shadow:.34,pt:[0,0,0],ptc:[0,0,0]};
+function setCam(eye,ctr,fov){CAM={eye,ctr};VP=mul(persp((fov||52)*Math.PI/180,W/H,.2,1500),lookAt(eye,ctr))}
+function project(p){const x=VP[0]*p[0]+VP[4]*p[1]+VP[8]*p[2]+VP[12],y=VP[1]*p[0]+VP[5]*p[1]+VP[9]*p[2]+VP[13],w=VP[3]*p[0]+VP[7]*p[1]+VP[11]*p[2]+VP[15];
+  return{x:(x/w*.5+.5)*W,y:(1-(y/w*.5+.5))*H,w,nx:x/w,ny:y/w}}
+function flush(){
+  gl.viewport(0,0,W,H);gl.clearColor(0,0,0,1);gl.clearStencil(0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT|gl.STENCIL_BUFFER_BIT);gl.disable(gl.CULL_FACE);
+  // céu
+  gl.useProgram(PS.p);gl.disable(gl.DEPTH_TEST);const f=norm([CAM.ctr[0]-CAM.eye[0],0,CAM.ctr[2]-CAM.eye[2]]);
+  const hz=project([CAM.eye[0]+f[0]*900,0,CAM.eye[2]+f[2]*900]);const sp=project([CAM.eye[0]+ENV.sun[0]*900,CAM.eye[1]+ENV.sun[1]*900,CAM.eye[2]+ENV.sun[2]*900]);
+  gl.uniform3fv(PS.u.uTop,ENV.top);gl.uniform3fv(PS.u.uMid,ENV.mid);gl.uniform3fv(PS.u.uHor,ENV.hor);gl.uniform3fv(PS.u.uSunC,ENV.sunC);
+  gl.uniform1f(PS.u.uHy,hz.ny);gl.uniform2f(PS.u.uSun,sp.nx,sp.ny);gl.uniform1f(PS.u.uSunOn,sp.w>0?ENV.sunOn:0);
+  gl.bindVertexArray(FS.vao);gl.drawArrays(gl.TRIANGLES,0,3);
+  // sólidos
+  gl.useProgram(P3.p);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.BLEND);const u=P3.u;
+  gl.uniformMatrix4fv(u.uVP,false,VP);gl.uniform3fv(u.uSunDir,ENV.sun);gl.uniform3fv(u.uSunCol,ENV.sunCol);gl.uniform3fv(u.uSky,ENV.sky);gl.uniform3fv(u.uGnd,ENV.gnd);
+  gl.uniform3fv(u.uFog,ENV.fog);gl.uniform1f(u.uFogDen,ENV.den);gl.uniform3fv(u.uCam,CAM.eye);gl.uniform3fv(u.uPtPos,ENV.pt);gl.uniform3fv(u.uPtCol,ENV.ptc);
+  gl.uniform1f(u.uFlat,0);gl.uniform1f(u.uAlpha,1);
+  for(const d of list){gl.uniformMatrix4fv(u.uM,false,d.M);gl.uniform3fv(u.uCol,d.col);gl.uniform1f(u.uEmis,d.e);gl.bindVertexArray(d.m.vao);gl.drawArrays(gl.TRIANGLES,0,d.m.n)}
+  // sombras projetadas no chão (estêncil evita escurecer duas vezes)
+  if(ENV.shadow>0){const L=ENV.sun,Sh=new Float32Array([1,0,0,0,-L[0]/L[1],0,-L[2]/L[1],0,0,0,1,0,0,.04,0,1]);
+    gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.enable(gl.STENCIL_TEST);gl.stencilFunc(gl.EQUAL,0,255);gl.stencilOp(gl.KEEP,gl.KEEP,gl.INCR);gl.depthMask(false);
+    gl.uniform1f(u.uFlat,1);gl.uniform1f(u.uAlpha,ENV.shadow);gl.uniform3f(u.uCol,.16,.06,.2);
+    for(const d of list){if(!d.sh)continue;gl.uniformMatrix4fv(u.uM,false,mul(Sh,d.M));gl.bindVertexArray(d.m.vao);gl.drawArrays(gl.TRIANGLES,0,d.m.n)}
+    gl.disable(gl.STENCIL_TEST);gl.depthMask(true)}
+  // feixes de luz (aditivo)
+  if(glow.length){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);gl.depthMask(false);gl.uniform1f(u.uFlat,1);
+    for(const d of glow){gl.uniformMatrix4fv(u.uM,false,d.M);gl.uniform3fv(u.uCol,d.col);gl.uniform1f(u.uAlpha,d.a);gl.bindVertexArray(d.m.vao);gl.drawArrays(gl.TRIANGLES,0,d.m.n)}
+    gl.depthMask(true)}
+  gl.disable(gl.BLEND);list=[];glow=[];M=I();st.length=0}
+
+// ============================================================ modelos low-poly
+const hs=(k,s)=>{const v=Math.sin(k*127.1+s*311.7)*43758.5453;return v-Math.floor(v)};
+const SKIN=[.96,.76,.62],INKC=[.1,.09,.12],WHITE=[.97,.96,.98];
+function person(p){push();T(p.x,(p.y||0)+(p.bob||0),p.z);R('y',p.ry||0);if(p.s)S(p.s);if(p.lean)R('x',p.lean);if(p.tw)R('y',p.tw);
+  const sk=p.skin||SKIN,sw=Math.sin(p.walk||0)*(p.amp||.75),dress=p.kind==='dress';
+  if(dress){push();S(.5,1.04,.5);draw(CONE,p.bottom);pop();push();T(0,.02,0);S(.56,.1,.56);draw(CYL,p.bottom);pop()}
+  else for(const [sx,ph] of [[-.11,sw],[.11,-sw]]){push();T(sx,.86,0);R('x',ph);push();S(.088,-.84,.088);draw(CYL,p.bottom);pop();T(0,-.81,.06);S(.19,.1,.3);draw(BOX,p.shoe||INKC);pop()}
+  push();T(0,1.16,0);S(.44,.62,.25);draw(BOX,p.top);pop();
+  if(p.suit){push();T(0,1.22,.128);S(.13,.44,.02);draw(BOX,WHITE);pop();push();T(0,1.41,.14);S(.13,.05,.03);draw(BOX,p.tie||[.7,.15,.25]);pop()}
+  if(p.belly){push();T(0,1.03,.1);S(.25,.24,.22);draw(SPH,p.top);pop()}
+  push();T(0,1.45,0);S(.06,.12,.06);draw(CYL,sk);pop();
+  push();T(0,1.67,0);if(p.nod)R('x',p.nod);
+    push();S(.17,.19,.17);draw(SPH,sk);pop();
+    for(const ex of [-.062,.062]){push();T(ex,.03,.153);S(p.eye||.024);draw(SPH,INKC,{sh:false});pop()}
+    push();T(0,-.075,.16);S(...(p.mouth||[.07,.016,.02]));draw(BOX,[.55,.16,.2],{sh:false});pop();
+    const h=p.hair||[.22,.14,.12];
+    if(p.hs!=='bald'){push();T(0,.055,-.02);S(.182,.15,.188);draw(SPH,h);pop()}
+    if(p.hs==='long'){push();T(0,-.2,-.12);S(.32,.46,.12);draw(BOX,h);pop()}
+    if(p.hs==='bun'){push();T(0,.2,-.08);S(.085);draw(SPH,h);pop()}
+    if(p.hs==='bald'){push();T(0,-.045,.165);S(.12,.028,.02);draw(BOX,h,{sh:false});pop();push();T(0,.0,-.03);S(.176,.12,.18);draw(SPH,h);pop()}
+    if(p.veil){push();T(0,-.62,-.2);S(.3,.78,.13);draw(CONE,[1,.98,1]);pop();push();T(0,.17,.02);S(.13,.03,.13);draw(CYL,[1,.82,.35]);pop()}
+    if(p.glasses){for(const ex of [-.062,.062]){push();T(ex,.03,.165);S(.05,.045,.012);draw(BOX,[.2,.2,.25],{sh:false});pop()}}
+  pop();
+  const arms=[[-1,p.armL!==undefined?p.armL:-sw,p.sprL||.08],[1,p.armR!==undefined?p.armR:sw,p.sprR||.08]];
+  for(const [sd,an,spr] of arms){push();T(sd*.275,1.42,0);R('z',sd*spr);R('x',an);push();S(.066,-.6,.066);draw(CYL,p.sleeve||p.top);pop();T(0,-.63,0);push();S(.072);draw(SPH,sk);pop();
+    if(sd===1&&p.item)p.item();pop()}
+  pop()}
+const GROOM=o=>Object.assign({top:[.13,.13,.17],bottom:[.13,.13,.17],suit:1,hair:[.2,.13,.1]},o);
+const BRIDE=o=>Object.assign({kind:'dress',top:WHITE,bottom:WHITE,sleeve:SKIN,hair:[.45,.24,.16],hs:'bun',veil:1},o);
+const bouquet=()=>{for(let i=0;i<5;i++){push();T(Math.cos(i*1.26)*.06,-.02+hs(i,1)*.05,.1+Math.sin(i*1.26)*.06);S(.07);draw(SPH,[[1,.45,.6],[1,.8,.85],[.95,.3,.4]][i%3]);pop()}};
+const slipper=()=>{push();T(0,-.05,.2);R('x',1.2);S(.13,.04,.34);draw(BOX,[.2,.75,.45]);pop()};
+
+function car(x,z,ry,col,o){o=o||{};push();T(x,0,z);R('y',ry);if(o.pitch)R('x',o.pitch);
+  push();T(0,.56,0);S(1.86,.46,4.3);draw(BOX,col);pop();
+  push();T(0,.83,1.4);S(1.76,.12,1.45);draw(BOX,col);pop();push();T(0,.83,-1.55);S(1.76,.12,1.1);draw(BOX,col);pop();
+  push();T(0,.8,-.2);S(1.6,.08,1.75);draw(BOX,[.16,.12,.14]);pop();
+  for(const sx of [-.42,.42]){push();T(sx,1.02,-.72);S(.6,.62,.2);draw(BOX,[.95,.9,.8]);pop()}
+  push();T(0,1.1,.66);R('x',-.45);S(1.62,.56,.05);draw(BOX,[.62,.88,.96],{e:.15});pop();
+  for(const sz of [2.2,-2.2]){push();T(0,.42,sz);S(1.92,.18,.16);draw(BOX,[.8,.8,.84]);pop()}
+  for(const sx of [-.66,.66]){push();T(sx,.64,2.16);S(.15);draw(SPH,[1,.95,.7],{e:1.2});pop();push();T(sx,.64,-2.17);S(.4,.13,.05);draw(BOX,[1,.2,.2],{e:1});pop()}
+  for(const wx of [-.95,.95])for(const wz of [1.38,-1.38]){push();T(wx+.14,.37,wz);R('z',Math.PI/2);R('y',o.spin||0);push();S(.37,.28,.37);draw(CYL,[.1,.1,.12]);pop();
+    T(0,-.02,0);S(.2,.32,.2);draw(CYL,[.85,.85,.9]);push();T(.5,.5,0);S(.5,.9,.3);draw(BOX,[.4,.4,.45],{sh:false});pop();pop()}
+  push();T(-.42,1.08,.24);R('x',1.15);S(.2,.03,.2);draw(CYL,INKC);pop();
+  if(o.driver)person(Object.assign({x:-.42,y:-.3,z:-.45,armL:-1.15,armR:-1.15},o.driver));
+  if(o.pass)person(Object.assign({x:.42,y:-.3,z:-.45},o.pass));
+  if(o.cans)for(let i=0;i<4;i++){const cx=-.6+i*.4,l=1.2+hs(i,3)*.8,b=Math.abs(Math.sin(o.cans*9+i*1.7))*.25;
+    push();T(cx,.35,-2.25);R('x',-1.25+b);S(.012,l,.012);draw(CYL,[.9,.9,.9],{sh:false});pop();push();T(cx,.08+b*.6,-2.25-l*.92);R('x',1.4);S(.07,.2,.07);draw(CYL,[.85,.85,.9]);pop()}
+  if(o.plate){push();T(0,.62,-2.2);S(1.1,.34,.04);draw(BOX,[1,.98,.95],{e:.5});pop();for(const hx of [-.36,0,.36]){push();T(hx,.62,-2.23);S(.085,.085,.02);draw(SPH,[1,.3,.45],{e:.8});pop()}}
+  pop()}
+function palm(x,z,k){push();T(x,0,z);R('y',hs(k,5)*6);const lean=.08+hs(k,6)*.1,h=6+hs(k,7)*2.5;R('z',lean);
+  push();S(.2,h,.2);draw(CYL,[.5,.36,.26]);pop();T(0,h,0);
+  for(let i=0;i<8;i++){push();R('y',i*.785+hs(k,8));R('x',.45+hs(i,k)*.25);T(0,0,1.25);S(.5,.05,2.5);draw(BOX,i%2?[.2,.52,.3]:[.16,.44,.27]);pop()}
+  push();S(.3);draw(SPH,[.36,.25,.18]);pop();pop()}
+function church(x,z,ry){push();T(x,0,z);R('y',ry);const wall=[.97,.93,.85],roof=[.78,.36,.3];
+  push();T(0,3,0);S(8,6,12);draw(BOX,wall);pop();push();T(0,6,0);S(9,2.8,12.6);draw(PRISM,roof);pop();
+  push();T(0,5.5,5.2);S(3.4,11,3.4);draw(BOX,wall);pop();push();T(0,11,5.2);S(2.7,3.4,2.7);draw(CONE,roof);pop();
+  push();T(0,15.1,5.2);S(.2,1.6,.2);draw(BOX,[1,.82,.35],{e:.4});pop();push();T(0,15.4,5.2);S(.95,.2,.2);draw(BOX,[1,.82,.35],{e:.4});pop();
+  push();T(0,1.6,6.92);S(1.7,3.2,.12);draw(BOX,[.46,.28,.2]);pop();push();T(0,3.2,6.92);S(.85,.85,.07);draw(SPH,[.46,.28,.2]);pop();
+  push();T(0,7.2,6.92);S(.8,.8,.06);draw(SPH,[.55,.8,.95],{e:.5});pop();
+  for(const sx of [-2.9,2.9])for(const sz of [-3,0,3]){push();T(sx*1.385,3.2,sz);S(.08,2.4,.9);draw(BOX,[.55,.8,.95],{e:.35});pop()}
+  push();T(0,.15,8);S(4.4,.3,2);draw(BOX,[.86,.82,.76]);pop();push();T(0,.08,9.3);S(5.4,.16,1.4);draw(BOX,[.86,.82,.76]);pop();
+  for(const sx of [-1.5,1.5]){push();T(sx,0,8.6);S(.28,1,.28);draw(CYL,[.86,.82,.76]);pop();push();T(sx,1.25,8.6);S(.42);draw(SPH,[1,.55,.68]);pop()}
+  pop()}
+const PAL=[[1,.72,.74],[.72,.9,.88],[1,.87,.66],[.84,.78,.96],[.98,.96,.9],[.64,.84,.96]];
+function world(cz){
+  push();T(0,0,cz+80);S(900,1,900);draw(QUAD,[.86,.76,.6],{sh:false});pop();
+  push();T(-345,.02,cz+80);S(600,1,900);draw(QUAD,[.2,.6,.7],{e:.25});pop();
+  push();T(-46.5,.03,cz+80);S(3,1,900);draw(QUAD,[.95,.97,1],{e:.3});pop();
+  push();T(0,.04,-139);S(9.4,1,522);draw(QUAD,[.23,.22,.27],{sh:false});pop();
+  push();T(0,.045,136);S(46,1,30);draw(QUAD,[.9,.84,.76],{sh:false});pop();
+  for(const sx of [-6.2,6.2]){push();T(sx,.07,-139);S(3,.14,522);draw(BOX,[.8,.77,.76],{sh:false});pop()}
+  push();T(230,.05,cz+80);S(440,1,900);draw(QUAD,[.7,.67,.68],{sh:false});pop();
+  const k0=Math.floor((cz-20)/6);
+  for(let i=0;i<46;i++){const z=(k0+i)*6;if(z<119){push();T(0,.06,z);S(.2,1,2.6);draw(QUAD,[1,.92,.6],{sh:false,e:.3});pop()}}
+  const p0=Math.floor((cz-24)/13);
+  for(let i=0;i<20;i++){const k=p0+i,z=k*13;if(z<118){palm(-6.6,z,k);palm(6.6,z+6,k+500)}}
+  const b0=Math.floor((cz-30)/17);
+  for(let i=0;i<17;i++){const k=b0+i,z=k*17;if(z>112)continue;const w=10+hs(k,1)*4,h=9+hs(k,2)*hs(k,9)*34,d=12,c=PAL[Math.floor(hs(k,3)*PAL.length)];
+    push();T(10.5+w/2,0,z);push();T(0,h/2,0);S(w,h,d);draw(BOX,c);pop();
+    const fl=Math.floor(h/3.2);for(let f=0;f<fl;f++){push();T(0,2+f*3.2,0);S(w+.12,1.3,d+.12);draw(BOX,[.2,.3,.45],{sh:false,e:hs(k,f)>.6?.5:.12});pop()}
+    push();T(0,h+.25,0);S(w+.6,.5,d+.6);draw(BOX,WHITE);pop();
+    if(hs(k,4)>.5){push();T(-w/2-.9,2.9,0);S(1.8,.16,d*.7);draw(BOX,[[1,.45,.55],[.3,.75,.7],[1,.8,.3]][k%3&3]||[1,.45,.55]);pop()}pop();
+    const h2=22+hs(k,11)*50;push();T(48+hs(k,12)*30,h2/2,z+4);S(14,h2,14);draw(BOX,[.72,.6,.72],{sh:false});pop()}
+  const u0=Math.floor((cz-20)/19);
+  for(let i=0;i<12;i++){const k=u0+i,z=k*19+5;if(z>112)continue;const ux=-14-hs(k,13)*24,c=[[1,.4,.5],[1,.85,.3],[.3,.8,.8],[1,1,1]][k&3]||[1,.4,.5];
+    push();T(ux,0,z);push();S(.06,2.3,.06);draw(CYL,WHITE);pop();T(0,2.1,0);S(1.7,.6,1.7);draw(CONE,c);pop()}
+  church(0,146,Math.PI);
+  for(const [px,pz] of [[-13,128],[13,128],[-17,142],[17,142],[-10,154],[10,154]])palm(px,pz,px*3+pz)}
+
+// ============================================================ cenas
+const cl=(v,a,b)=>Math.max(a,Math.min(b,v)),ss=(a,b,v)=>{const t=cl((v-a)/(b-a),0,1);return t*t*(3-2*t)},eo=t=>1-Math.pow(1-cl(t,0,1),3);
+const TA=3.6,TB=10.4,TC=16.6,TD=21.8,END=28.0;
+const brl=v=>'R$ '+Math.round(v).toLocaleString('pt-BR');
+function money(t){const v=4990+t*t*210+Math.floor(t*7)*137;return `<div class="abs money"><small>GASTOS DA FESTA</small><b>${brl(v)}</b></div>`}
+function banner(t,a,b){const k=ss(0,.25,t)*(1-ss(1.45,1.7,t));return k<=0?'':`<div class="abs ban" style="opacity:${k};transform:translateX(${(1-ss(0,.25,t))*-140+ss(1.45,1.7,t)*140}px)"><div class="in"><small>${a}</small><b>${b}</b></div></div>`}
+function minimap(prog,head){const y=-prog*520;return `<div class="abs mini"><svg width="250" height="250" viewBox="-125 -125 250 250"><g transform="rotate(${head}) scale(-1,1) translate(0,${-y-390})">
+  <rect x="-900" y="-400" width="1800" height="1400" fill="#22384a"/><rect x="-900" y="-400" width="760" height="1400" fill="#2b6c86"/>
+  <rect x="-19" y="-150" width="38" height="1200" fill="#5d6b78"/>${[0,1,2,3,4,5,6].map(i=>`<rect x="19" y="${-60+i*170}" width="300" height="22" fill="#5d6b78"/>`).join('')}
+  <rect x="-5" y="-150" width="10" height="${540+y+150<0?0:540+y+150}" fill="#FFD34D"/><g transform="translate(0,-175)"><rect x="-26" y="-26" width="52" height="52" rx="10" fill="#FF8FB8" stroke="#fff" stroke-width="5"/><path d="M0,-15V15M-10,-5H10" stroke="#fff" stroke-width="6"/></g></g>
+  <path d="M0,-22L16,18L0,9L-16,18Z" fill="#fff" stroke="#111" stroke-width="3"/></svg></div>`}
+function tag(p,txt,sm){const s=project(p);return s.w<0?'':`<div class="abs tag" style="left:${s.x}px;top:${s.y}px">${txt}${sm?`<small>${sm}</small>`:''}</div>`}
+
+function sceneTitle(t){ENV=SUNSET;const a=-.5+t*.2,r=6.2;setCam([Math.sin(a)*r,1.3,129.5-Math.cos(a)*r],[0,2.3,131],60);world(110);
+  const b=Math.sin(t*3)*.02;person(GROOM({x:.5,z:129.5,ry:Math.PI,bob:b,armR:-.5,sprR:.5,mouth:[.09,.03,.02]}));
+  person(BRIDE({x:-.45,z:129.5,ry:Math.PI,bob:-b,armR:-1.0,sprR:.15,mouth:[.09,.03,.02],item:bouquet}));
+  const k=ss(.3,1,t),k2=ss(1.0,1.6,t);
+  return `<div class="abs bars" style="inset:0;--h:${150*(1-ss(3.2,3.6,t))}px"></div>
+   <div class="abs big" style="top:330px;font-size:40px;letter-spacing:.2em;font-style:normal;opacity:${k}">SE O CASAMENTO FOSSE UM</div>
+   <div class="abs big" style="top:400px;font-size:118px;opacity:${k2};transform:scale(${1.25-k2*.25});color:#FFD34D;-webkit-text-stroke:3px #2a0f2e">JOGO DE<br>MUNDO ABERTO</div>
+   <div class="abs big" style="bottom:400px;font-size:34px;letter-spacing:.24em;font-style:normal;opacity:${ss(1.8,2.4,t)}">@NOSSAHISTORIA.A2 APRESENTA</div>`}
+function carZ(t){const u=cl(t/6.5,0,1);return -40+158*(u*(1.75-.75*u))}
+function sceneDrive(t){ENV=SUNSET;const z=carZ(t),x=Math.sin(t*1.3)*.7,sp=(carZ(t+.03)-z)/.03;
+  const sh=Math.sin(t*37)*.03*sp/30;setCam([x*.6+.5,3.5+sh,z-8.8],[x*.7,1.1,z+6],56);world(z);
+  car(x,z,Math.cos(t*1.3)*.07,[.18,.78,.8],{spin:z*2.7,pitch:-.012*(sp>20?1:0)+ss(5.6,6.5,t)*.03,driver:GROOM({hs:'short',nod:Math.sin(t*6)*.05})});
+  let h=money(t)+minimap(cl((z+40)/158,0,1),Math.sin(t*1.3)*4)+banner(t,'MISSÃO 1','Chegar na igreja<br>antes da noiva');
+  const rem=Math.max(0,299-t*46),mm=String(Math.floor(rem/60)).padStart(2,'0'),sc=String(Math.floor(rem%60)).padStart(2,'0');
+  h+=`<div class="abs alert" style="top:400px;font-size:56px;letter-spacing:.02em;color:${rem<60?'#FF6464':'#fff'}">${mm}:${sc}</div>`;
+  const pk=ss(2.3,2.6,t)*(1-ss(5.7,6.0,t));
+  if(pk>0)h+=`<div class="abs phone" style="opacity:${pk};transform:translateX(${(1-ss(2.3,2.6,t))*-700}px)"><div class="av">N</div><div class="n">NOIVA 💍</div><div class="m">amor, tô quase pronta!</div>${t>3.9?'<div class="tr">TRADUÇÃO: FALTAM 2 HORAS</div>':''}</div>`;
+  if(t>1.7)h+=`<div class="abs obj">Dirija até a <b class="y">igreja</b>.${t>4.2?' Sem pressa.':''}</div>`;return h}
+function sceneChase(t){ENV=SUNSET;let h=money(TB-TA+t);
+  if(t<2.1){setCam([1.9-t*.25,1.55,123.3],[0,1.35,128],50);world(112);
+    const pat=Math.sin(t*16)*.35;person(GROOM({x:0,z:128,ry:Math.PI,armL:-.75+pat,armR:-.75-pat,sprL:-.25,sprR:-.25,eye:t>.9?.034:.024,mouth:t>.9?[.06,.06,.02]:[.07,.016,.02],nod:t<.9?.3:0}));
+    car(-4.2,121,.5,[.18,.78,.8],{});
+    if(t>.9)h+=`<div class="abs big" style="top:520px;font-size:86px;color:#FF6464;-webkit-text-stroke:3px #2a0f2e;transform:scale(${1+Math.max(0,1.15-t)*1.2})">Alianças:<br>não encontradas</div>`;
+    h+=`<div class="abs obj">${t<.9?'Confira os <b class="y">bolsos</b>.':'<b class="r">Ih...</b>'}</div>`}
+  else{const u=t-2.1,gz=118-u*8.2,sz=gz+3.4+Math.max(0,1.2-u)*4-u*.25;setCam([.9+Math.sin(u*2)*.4,1.5+Math.sin(u*14)*.03,gz-5.6],[-.4,1.25,gz+2],56);world(gz-20);
+    person(GROOM({x:.3,z:gz,ry:Math.PI,walk:u*15,lean:.18,amp:1.0,eye:.034,mouth:[.07,.07,.02],bob:Math.abs(Math.sin(u*15))*.08}));
+    person({x:-1.25,z:sz,ry:Math.PI,kind:'dress',top:[.6,.3,.75],bottom:[.6,.3,.75],hair:[.8,.8,.84],hs:'bun',glasses:1,sleeve:[.6,.3,.75],lean:.2,bob:Math.abs(Math.sin(u*17))*.07,armR:Math.PI+.5+Math.sin(u*17)*.5,armL:-.9,mouth:[.08,.05,.02],item:slipper,s:.95});
+    h+=tag([-1.25,2.2,sz],'SOGRA','NÍVEL 99')+`<div class="abs obj">Fuja da <b class="r">sogra</b>.</div>`}
+  const lv=t<1.4?0:Math.min(5,1+Math.floor((t-1.4)*3.2));
+  h+=`<div class="abs alert" style="opacity:${t>1.2?1:0};${lv>=5&&Math.floor(t*6)%2?'color:#FF6464':''}">ALERTA DE SOGRA<br>${[0,1,2,3,4].map(i=>`<i class="${i<lv?'on':''}"></i>`).join('')}</div>`;
+  return h}
+function sceneParty(t){const beat=t*124/60*Math.PI,hue=i=>[[1,.25,.55],[.25,.6,1],[1,.75,.2],[.5,1,.6],[.8,.4,1]][((i%5)+5)%5],bi=Math.floor(t*124/60*2);
+  ENV={sun:norm([.2,1,.35]),sunCol:[.3,.26,.45],sky:[.3,.24,.46],gnd:[.4,.16,.34],fog:[.06,.03,.12],den:.018,top:[.02,.02,.08],mid:[.1,.05,.2],hor:[.25,.1,.3],sunC:[.9,.9,1],sunOn:0,shadow:0,
+    pt:[0,4.6,1.5],ptc:hue(bi).map(v=>v*2.2)};
+  const a=Math.sin(t*.5)*.4;setCam([Math.sin(a)*9.4,1.6,Math.cos(a)*9.4],[0,1.9,0],58);
+  push();S(120,1,120);draw(QUAD,[.12,.08,.16],{sh:false});pop();
+  for(let i=-4;i<4;i++)for(let j=-4;j<4;j++){const on=hs(i*9+j,bi)>.45;push();T(i*1.5+.75,.03,j*1.5+.75);S(1.42,1,1.42);draw(QUAD,on?hue(i+j+bi):[.16,.12,.22],{sh:false,e:on?.55:.1});pop()}
+  push();T(0,5.2,0);S(.5);R('y',t*2);draw(SPH,[.9,.9,1],{e:.8});pop();push();T(0,5.7,0);S(.02,3,.02);draw(CYL,[.5,.5,.6]);pop();
+  for(let i=0;i<4;i++){const bx=Math.sin(t*1.7+i*1.6)*4,bz=-2+Math.cos(t*1.3+i*2.1)*2.5;push();T(bx,0,bz);S(1.7,9,1.7);beam(CONE,hue(i+bi),.16);pop()}
+  for(let s=0;s<2;s++)for(let i=0;i<=14;i++){const u=i/14,x=-9+u*18,y=5.4-Math.sin(u*Math.PI)*1.1,z=s?-6.5:-3.2;push();T(x,y,z);S(.11);draw(SPH,[1,.85,.5],{e:1.6});pop()}
+  push();T(-4.6,0,-4.6);push();S(1.1,.9,1.1);draw(CYL,[.95,.93,.98]);pop();for(let k=0;k<3;k++){push();T(0,.9+k*.42,0);S(.6-k*.16,.42,.6-k*.16);draw(CYL,[1,.97,.98],{e:.2});pop()}T(0,2.2,0);S(.09);draw(SPH,[1,.4,.5],{e:1});pop();
+  for(let i=0;i<9;i++){const an=-1.25+i*.31,rr=6.2+hs(i,2)*1.4;person({x:Math.sin(an)*rr,z:-Math.cos(an)*rr*.75-1.5,ry:-an*.4,top:hue(i),bottom:i%2?[.15,.15,.2]:hue(i+2),kind:i%2?undefined:'dress',sleeve:i%2?undefined:SKIN,hair:[.2+hs(i,4)*.5,.15+hs(i,5)*.3,.1],hs:i%2?'short':'long',
+    bob:Math.abs(Math.sin(beat+i))*.12,armL:Math.PI+Math.sin(beat+i)*.5,armR:Math.PI-Math.sin(beat+i)*.5,sprL:.3,sprR:.3,mouth:[.08,.04,.02]})}
+  const sway=Math.sin(beat);
+  person(GROOM({x:1.7,z:.9,ry:-.25,bob:Math.abs(Math.sin(beat))*.1,armL:-1.2+sway*.4,armR:-1.2-sway*.4,tw:sway*.2,mouth:t>1.6?[.1,.016,.02]:[.09,.04,.02]}));
+  person(BRIDE({x:-1.7,z:.9,ry:.25,bob:Math.abs(Math.sin(beat+1))*.1,armL:Math.PI+sway*.4,armR:-.6,sprL:.3,tw:-sway*.2,mouth:[.09,.04,.02]}));
+  person({x:0,z:1.4,ry:0,s:1.08,top:[.95,.85,.55],bottom:[.4,.3,.24],belly:1,hs:'bald',hair:[.3,.2,.15],bob:Math.abs(Math.sin(beat))*.18,tw:sway*.5,armL:Math.PI*(sway>0?1:.55),armR:Math.PI*(sway>0?.55:1),sprL:.5,sprR:.5,mouth:[.11,.06,.02],walk:beat,amp:.25});
+  const hp=1-ss(2.6,4.6,t)*.25;
+  let h=`<div class="abs boss" style="opacity:${ss(.2,.6,t)}">CHEFÃO: <span class="y">TIO DO PAVÊ</span><div class="bar"><div style="width:${hp*100}%"></div></div></div>`+banner(t,'MISSÃO 3','Sobreviver à<br>pista de dança');
+  if(t>1.7&&t<3.5)h+=tag([0,2.45,1.4],'É PAVÊ OU PRA COMER?');
+  if(t>3.5)h+=`<div class="abs big" style="top:1060px;font-size:70px;color:#FF6464;-webkit-text-stroke:3px #2a0f2e;transform:scale(${1+Math.max(0,3.75-t)*1.5})">Dano crítico!<br><span style="font-size:48px;color:#fff;-webkit-text-stroke:0">paciência −50</span></div>`;
+  if(t>1.7)h+=`<div class="abs obj">Ria da <b class="y">piada</b> pela 14ª vez.</div>`;return h+money(TC-TA+t+8)}
+function sceneEnd(t){ENV=SUNSET;const z=20+t*6.5;setCam([2.0-t*.1,1.5+t*.3,11+t*4.6],[0,2.6+t*.3,z+12],54);world(z);
+  car(Math.sin(t*1.1)*.5,z,Math.cos(t*1.1)*.05,[.18,.78,.8],{spin:z*2.7,cans:t,plate:1,driver:GROOM({ry:.0}),pass:BRIDE({armR:Math.PI+Math.sin(t*5)*.3,sprR:.3})});
+  for(let i=0;i<7;i++){const u=((t*.35+i*.37)%1.6);push();T(Math.sin(i*2.2+t)*.8+Math.sin(t*1.1)*.5,1.8+u*4.5,z-1-u*5);S(.16+hs(i,1)*.1);draw(SPH,i%2?[1,.45,.6]:[1,.75,.82],{e:.7});pop()}
+  const k=ss(1.0,1.4,t);let h=`<div class="abs" style="left:100px;right:100px;top:630px;height:440px;border-radius:26px;background:rgba(18,10,30,.62);opacity:${ss(1.7,2.1,t)}"></div><div class="abs big" style="top:330px;font-size:124px;color:#FFD34D;-webkit-text-stroke:4px #2a0f2e;opacity:${k};transform:scale(${1.5-k*.5})">Missão<br>cumprida</div>`;
+  const st=[['ESPOSA','+1','pk'],['CONTA BANCÁRIA','−100%','r'],['SOGRA','SATISFEITA*','y'],['FELICIDADE','+999','g']];
+  st.forEach((s,i)=>{const a=ss(1.9+i*.55,2.15+i*.55,t);h+=`<div class="abs stat" style="top:${660+i*86}px;opacity:${a};transform:translateX(${(1-a)*80}px)"><span>${s[0]}</span><span class="${s[2]}">${s[1]}</span></div>`});
+  h+=`<div class="abs" style="left:150px;top:1010px;font-size:26px;font-weight:600;opacity:${ss(3.9,4.2,t)}">*por enquanto</div>`;
+  h+=`<div class="abs obj" style="opacity:${ss(4.3,4.8,t)}">Marque seu <b class="pk">player 2</b> 💍<br><span style="font-size:32px;letter-spacing:.12em">@NOSSAHISTORIA.A2</span></div>`;return h}
+
+function render(t){let h;const cuts=[TA,TB,TC,TD];
+  if(t<TA)h=sceneTitle(t);else if(t<TB)h=sceneDrive(t-TA);else if(t<TC)h=sceneChase(t-TB);else if(t<TD)h=sceneParty(t-TC);else h=sceneEnd(t-TD);
+  flush();document.getElementById('hud').innerHTML=h;
+  let f=Math.max(0,1-t/.35,(t-(END-.5))/.5);for(const c of cuts)f=Math.max(f,1-Math.abs(t-c)/.14);
+  if(t>=TB+2.1-.1&&t<TB+2.1+.1)f=Math.max(f,1-Math.abs(t-TB-2.1)/.1);
+  document.getElementById('fade').style.opacity=cl(f,0,1);return true}
+window.render=render;window.END=END;
+</script></body></html>
